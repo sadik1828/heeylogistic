@@ -28,7 +28,10 @@ import {
   Info,
   Star,
   Shield,
-  Key
+  Key,
+  Navigation,
+  TrendingUp,
+  Package
 } from "lucide-react";
 
 // --- DATA STRUCTURES ----------------------------------------------------
@@ -57,7 +60,9 @@ const seedDrivers = [
     co_ownershipDocUrl: "#",
     rating: 4.5,
     assignedClientId: SEED_OWNER_ID,
-    identityVerified: true
+    identityVerified: true,
+    currentLocation: { lat: 9.5616, lng: 44.0650 },
+    routeProgress: 65
   },
   {
     id: "d2",
@@ -75,7 +80,9 @@ const seedDrivers = [
     co_ownershipDocUrl: "#",
     rating: 4.2,
     assignedClientId: "o2",
-    identityVerified: true
+    identityVerified: true,
+    currentLocation: { lat: 10.4340, lng: 45.0140 },
+    routeProgress: 30
   },
   {
     id: "d3",
@@ -93,7 +100,9 @@ const seedDrivers = [
     co_ownershipDocUrl: "#",
     rating: 4.8,
     assignedClientId: null,
-    identityVerified: false
+    identityVerified: false,
+    currentLocation: { lat: 9.9349, lng: 43.1809 },
+    routeProgress: 90
   },
 ];
 
@@ -152,6 +161,248 @@ const seedMessages = [
     { id: "m2", from: "driver", toId: "u1", text: "Yes, 10 minutes out from customs.", at: now() },
     { id: "m3", from: "admin", toId: "o2", text: "Zahra, please check your waybill upload.", at: now() },
 ];
+
+// --- CHART COMPONENTS ----------------------------------------------------
+
+const BarChart = ({ data, title, className = "" }) => {
+  const maxValue = Math.max(...data.map(item => item.value), 1);
+  
+  return (
+    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
+      {title && <h3 className="font-semibold text-gray-900 mb-4">{title}</h3>}
+      <div className="space-y-3">
+        {data.map((item, index) => (
+          <div key={index} className="flex items-center space-x-3">
+            <span className="text-sm text-gray-600 w-20 truncate">{item.label}</span>
+            <div className="flex-1 bg-gray-100 rounded-full h-6 overflow-hidden">
+              <div 
+                className="bg-blue-600 h-full rounded-full transition-all duration-500"
+                style={{ width: `${(item.value / maxValue) * 100}%` }}
+              ></div>
+            </div>
+            <span className="text-sm font-medium text-gray-900 w-8">{item.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const PieChart = ({ data, title, className = "" }) => {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  let accumulatedPercent = 0;
+  
+  const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
+  
+  return (
+    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
+      {title && <h3 className="font-semibold text-gray-900 mb-4">{title}</h3>}
+      <div className="flex items-center justify-center">
+        <div className="relative w-40 h-40">
+          <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+            {data.map((item, index) => {
+              const percent = total > 0 ? (item.value / total) * 100 : 0;
+              const dashArray = `${percent} ${100 - percent}`;
+              const offset = accumulatedPercent;
+              accumulatedPercent += percent;
+              
+              return (
+                <circle
+                  key={index}
+                  cx="50"
+                  cy="50"
+                  r="40"
+                  fill="transparent"
+                  stroke={colors[index % colors.length]}
+                  strokeWidth="20"
+                  strokeDasharray={dashArray}
+                  strokeDashoffset={-offset}
+                  className="transition-all duration-500"
+                />
+              );
+            })}
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="text-2xl font-bold text-gray-900">{total}</span>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 space-y-2">
+        {data.map((item, index) => (
+          <div key={index} className="flex items-center space-x-2">
+            <div 
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: colors[index % colors.length] }}
+            ></div>
+            <span className="text-sm text-gray-600 flex-1">{item.label}</span>
+            <span className="text-sm font-medium text-gray-900">{item.value}</span>
+            <span className="text-sm text-gray-500">({total > 0 ? Math.round((item.value / total) * 100) : 0}%)</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const LineChart = ({ data, title, className = "" }) => {
+  const maxValue = Math.max(...data.map(item => item.value), 1);
+  const points = data.map((item, index) => {
+    const x = (index / (data.length - 1)) * 100;
+    const y = 100 - (item.value / maxValue) * 100;
+    return `${x},${y}`;
+  }).join(' ');
+
+  return (
+    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
+      {title && <h3 className="font-semibold text-gray-900 mb-4">{title}</h3>}
+      <div className="h-48 relative">
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          {/* Grid lines */}
+          {[0, 25, 50, 75, 100].map((y, index) => (
+            <line
+              key={index}
+              x1="0"
+              y1={y}
+              x2="100"
+              y2={y}
+              stroke="#e5e7eb"
+              strokeWidth="0.5"
+            />
+          ))}
+          
+          {/* Data line */}
+          <polyline
+            fill="none"
+            stroke="#3b82f6"
+            strokeWidth="2"
+            points={points}
+          />
+          
+          {/* Data points */}
+          {data.map((item, index) => {
+            const x = (index / (data.length - 1)) * 100;
+            const y = 100 - (item.value / maxValue) * 100;
+            return (
+              <circle
+                key={index}
+                cx={x}
+                cy={y}
+                r="2"
+                fill="#3b82f6"
+              />
+            );
+          })}
+        </svg>
+        
+        {/* X-axis labels */}
+        <div className="flex justify-between text-xs text-gray-500 mt-2">
+          {data.map((item, index) => (
+            <span key={index}>{item.label}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- TRACKING STATUS COMPONENT ------------------------------------------
+
+const TrackingStatus = ({ drivers, className = "" }) => {
+  const activeDrivers = drivers.filter(driver => 
+    driver.status !== 'idle' && driver.assignedClientId
+  );
+
+  const getStatusInfo = (status) => {
+    const statusInfo = {
+      'loading': { label: 'Loading', color: 'bg-yellow-500', step: 1 },
+      'in-transit': { label: 'In Transit', color: 'bg-blue-500', step: 2 },
+      'custom-reached': { label: 'Customs', color: 'bg-purple-500', step: 3 },
+      'unloading': { label: 'Unloading', color: 'bg-red-500', step: 4 },
+      'purchaser-reached': { label: 'Delivered', color: 'bg-green-500', step: 5 }
+    };
+    return statusInfo[status] || { label: status, color: 'bg-gray-500', step: 0 };
+  };
+
+  return (
+    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
+      <h3 className="font-semibold text-gray-900 mb-4">Live Tracking</h3>
+      
+      {activeDrivers.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+          <p>No active deliveries</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {activeDrivers.map(driver => {
+            const statusInfo = getStatusInfo(driver.status);
+            const progress = driver.routeProgress || 0;
+            
+            return (
+              <div key={driver.id} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <img 
+                      src={driver.photoUrl} 
+                      alt={driver.name}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                    <div>
+                      <h4 className="font-medium text-gray-900">{driver.name}</h4>
+                      <p className="text-sm text-gray-600">{driver.truckNumber}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color} text-white`}>
+                      {statusInfo.label}
+                    </span>
+                    <p className="text-sm text-gray-600 mt-1">{progress}% complete</p>
+                  </div>
+                </div>
+                
+                {/* Progress bar */}
+                <div className="mb-3">
+                  <div className="flex justify-between text-xs text-gray-600 mb-1">
+                    <span>Origin</span>
+                    <span>Destination</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${statusInfo.color} transition-all duration-500`}
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+                
+                {/* Status timeline */}
+                <div className="flex justify-between relative">
+                  {[1, 2, 3, 4, 5].map(step => (
+                    <div key={step} className="flex flex-col items-center">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs ${
+                        step <= statusInfo.step ? statusInfo.color : 'bg-gray-300'
+                      }`}>
+                        {step}
+                      </div>
+                      <span className="text-xs text-gray-600 mt-1 text-center">
+                        {['Loading', 'Transit', 'Customs', 'Unloading', 'Delivered'][step - 1]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Current location */}
+                <div className="flex items-center space-x-2 mt-3 text-sm text-gray-600">
+                  <Navigation className="w-4 h-4 text-blue-500" />
+                  <span>Current: {driver.currentLocation ? `${driver.currentLocation.lat.toFixed(4)}, ${driver.currentLocation.lng.toFixed(4)}` : 'Tracking...'}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // --- STYLED COMPONENTS ----------------------------------------------------
 
@@ -389,6 +640,7 @@ const Header = ({ title, actions }) => {
           <Bell className="w-4 h-4 mr-2" />
           Notifications
         </Button>
+        {actions}
       </div>
     </div>
   );
@@ -396,7 +648,33 @@ const Header = ({ title, actions }) => {
 
 // --- DASHBOARD COMPONENT -------------------------------------------------
 
-const Dashboard = ({ stats, recentActivities }) => {
+const Dashboard = ({ stats, recentActivities, drivers, owners, tracks }) => {
+  // Chart data
+  const statusDistribution = [
+    { label: 'Idle', value: drivers.filter(d => d.status === 'idle').length },
+    { label: 'Loading', value: drivers.filter(d => d.status === 'loading').length },
+    { label: 'In Transit', value: drivers.filter(d => d.status === 'in-transit').length },
+    { label: 'Customs', value: drivers.filter(d => d.status === 'custom-reached').length },
+    { label: 'Unloading', value: drivers.filter(d => d.status === 'unloading').length },
+    { label: 'Delivered', value: drivers.filter(d => d.status === 'purchaser-reached').length }
+  ];
+
+  const monthlyPerformance = [
+    { label: 'Jan', value: 45 },
+    { label: 'Feb', value: 52 },
+    { label: 'Mar', value: 48 },
+    { label: 'Apr', value: 60 },
+    { label: 'May', value: 65 },
+    { label: 'Jun', value: 70 }
+  ];
+
+  const vehicleTypes = [
+    { label: 'Hino', value: tracks.filter(t => t.model.includes('Hino')).length },
+    { label: 'Isuzu', value: tracks.filter(t => t.model.includes('Isuzu')).length },
+    { label: 'Fuso', value: tracks.filter(t => t.model.includes('Fuso')).length },
+    { label: 'Mercedes', value: tracks.filter(t => t.model.includes('Mercedes')).length }
+  ];
+
   return (
     <div className="space-y-6">
       <Header title="Dashboard Overview" />
@@ -415,6 +693,36 @@ const Dashboard = ({ stats, recentActivities }) => {
             </p>
           </Card>
         ))}
+      </div>
+
+      {/* Charts and Tracking Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Status Distribution Pie Chart */}
+        <PieChart 
+          data={statusDistribution}
+          title="Driver Status Distribution"
+        />
+        
+        {/* Monthly Performance Line Chart */}
+        <LineChart 
+          data={monthlyPerformance}
+          title="Monthly Delivery Performance"
+          className="lg:col-span-2"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Vehicle Types Bar Chart */}
+        <BarChart 
+          data={vehicleTypes}
+          title="Vehicle Types"
+          className="lg:col-span-2"
+        />
+        
+        {/* Live Tracking */}
+        <TrackingStatus 
+          drivers={drivers}
+        />
       </div>
 
       {/* Recent Activities */}
@@ -471,16 +779,17 @@ const DriverManagement = ({ drivers, onUpdateStatus, onSaveDriver, onDeleteDrive
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (editingDriver) {
-      onSaveDriver({ ...editingDriver, ...formData });
-    } else {
-      onSaveDriver({
-        ...formData,
-        waybills: [],
-        rating: 0,
-        assignedClientId: null
-      });
-    }
+    const driverData = {
+      ...formData,
+      id: editingDriver?.id || generateId(),
+      waybills: editingDriver?.waybills || [],
+      rating: editingDriver?.rating || 0,
+      assignedClientId: editingDriver?.assignedClientId || null,
+      currentLocation: editingDriver?.currentLocation || { lat: 9.5616, lng: 44.0650 },
+      routeProgress: editingDriver?.routeProgress || 0
+    };
+
+    onSaveDriver(driverData);
     resetForm();
   };
 
@@ -550,78 +859,84 @@ const DriverManagement = ({ drivers, onUpdateStatus, onSaveDriver, onDeleteDrive
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="Driver Name"
+                  label="Full Name"
                   value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
                 <Input
                   label="Phone Number"
+                  type="tel"
                   value={formData.phone}
-                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   required
                 />
                 <Input
                   label="Address"
                   value={formData.address}
-                  onChange={e => setFormData({ ...formData, address: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   required
                 />
                 <Input
                   label="Truck Number"
                   value={formData.truckNumber}
-                  onChange={e => setFormData({ ...formData, truckNumber: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value })}
                   required
                 />
-                <FileUpload
-                  label="Driver Photo"
-                  onFileChange={(e) => handleFileUpload('photoUrl', e)}
+                <Select
+                  label="Status"
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  options={statusOptions}
                 />
-                <FileUpload
-                  label="Driver License"
-                  onFileChange={(e) => handleFileUpload('driverLicenseUrl', e)}
+                <Input
+                  label="Photo URL"
+                  value={formData.photoUrl}
+                  onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
                 />
                 <Input
                   label="Car Owner Name"
                   value={formData.co_name}
-                  onChange={e => setFormData({ ...formData, co_name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, co_name: e.target.value })}
                   required
                 />
                 <Input
                   label="Car Owner Phone"
                   value={formData.co_phone}
-                  onChange={e => setFormData({ ...formData, co_phone: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, co_phone: e.target.value })}
                   required
                 />
-                <FileUpload
-                  label="Car Ownership Document"
-                  onFileChange={(e) => handleFileUpload('co_ownershipDocUrl', e)}
-                />
-                <Select
-                  label="Status"
-                  value={formData.status}
-                  onChange={e => setFormData({ ...formData, status: e.target.value })}
-                  options={statusOptions}
-                />
               </div>
-              <div className="flex items-center">
+              
+              <FileUpload
+                label="Driver License"
+                onFileChange={(e) => handleFileUpload('driverLicenseUrl', e)}
+              />
+              
+              <FileUpload
+                label="Ownership Document"
+                onFileChange={(e) => handleFileUpload('co_ownershipDocUrl', e)}
+              />
+              
+              <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="identityVerified"
                   checked={formData.identityVerified}
-                  onChange={e => setFormData({ ...formData, identityVerified: e.target.checked })}
-                  className="mr-2"
+                  onChange={(e) => setFormData({ ...formData, identityVerified: e.target.checked })}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <label htmlFor="identityVerified" className="text-sm text-gray-700">
                   Identity Verified
                 </label>
               </div>
-              <div className="flex space-x-3 pt-4">
-                <Button type="button" variant="secondary" onClick={resetForm} className="flex-1">
+              
+              <div className="flex justify-end space-x-3 pt-4">
+                <Button type="button" variant="secondary" onClick={resetForm}>
                   Cancel
                 </Button>
-                <Button type="submit" className="flex-1">
-                  {editingDriver ? 'Update' : 'Create'} Driver
+                <Button type="submit">
+                  {editingDriver ? 'Update Driver' : 'Add Driver'}
                 </Button>
               </div>
             </form>
@@ -1759,7 +2074,7 @@ const App = () => {
   const renderContent = () => {
     switch (currentTab) {
       case "dashboard":
-        return <Dashboard stats={stats} recentActivities={recentActivities} />;
+        return <Dashboard stats={stats} recentActivities={recentActivities} drivers={drivers} owners={owners} tracks={tracks} />;
       case "drivers":
         return <DriverManagement 
           drivers={drivers} 
@@ -1805,7 +2120,7 @@ const App = () => {
       case "about":
         return <About />;
       default:
-        return <Dashboard stats={stats} recentActivities={recentActivities} />;
+        return <Dashboard stats={stats} recentActivities={recentActivities} drivers={drivers} owners={owners} tracks={tracks} />;
     }
   };
 
