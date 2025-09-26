@@ -1,16 +1,35 @@
 import React, { useMemo, useState } from "react";
+import {
+  Truck,
+  User,
+  MapPin,
+  MessageCircle,
+  Car,
+  BarChart3,
+  FileText,
+  Settings as SettingsIcon,
+  Phone,
+  Mail,
+  Map,
+  LogOut,
+  Search,
+  Bell,
+  ChevronDown,
+  Plus,
+  Edit,
+  Trash2,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Download,
+  Upload,
+  Filter,
+  MoreVertical
+} from "lucide-react";
 
-// --- UPDATED TYPES AND DATA STRUCTURES ----------------------------------------------------
-// User:    { id, username, password }
-// Driver:  { id, name, address, phone, status, truckNumber, carOwnerId?, 
-//            photoUrl, driverLicenseUrl, waybills[],
-//            // Car Owner Details (Merged for registration)
-//            co_name?, co_phone?, co_ownershipDocUrl? }
-// Owner:   { id, name, location, phone, waybills[] }
-// Track:   { id, plate, model?, isAvailable, carOwnerId?, assignedDriverId? }
-// Message: { id, from: 'admin'|'driver'|'owner', toId: string, text, at }
-
+// --- DATA STRUCTURES ----------------------------------------------------
 const now = () => new Date().toISOString();
+const generateId = () => Date.now().toString(36) + Math.random().toString(36).substring(2);
 
 const SEED_CAR_OWNER_ID = "co1";
 const SEED_DRIVER_ID = "d1";
@@ -25,13 +44,13 @@ const seedDrivers = [
     phone: "+25263 555 1122",
     status: "idle",
     truckNumber: "SL-TRK-9921",
-    photoUrl: "https://via.placeholder.com/150?text=Driver+Photo",
-    driverLicenseUrl: "https://via.placeholder.com/150?text=License+DL-123",
-    waybills: [{ id: "w1", name: "Customs Clearance.pdf", uploadedAt: now(), fileUrl: "https://via.placeholder.com/150?text=Waybill-W1" }],
+    photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    driverLicenseUrl: "#",
+    waybills: [{ id: "w1", name: "Customs Clearance.pdf", uploadedAt: now(), fileUrl: "#" }],
     carOwnerId: SEED_CAR_OWNER_ID,
     co_name: "Mahad Transport Co.",
     co_phone: "+25263 500 1111",
-    co_ownershipDocUrl: "https://via.placeholder.com/150?text=Ownership-O1",
+    co_ownershipDocUrl: "#",
   },
   {
     id: "d2",
@@ -40,34 +59,59 @@ const seedDrivers = [
     phone: "+25263 777 9010",
     status: "custom-reached",
     truckNumber: "SL-TRK-4410",
-    photoUrl: "https://via.placeholder.com/150?text=Driver+Photo",
-    driverLicenseUrl: "https://via.placeholder.com/150?text=License+DL-984",
-    waybills: [{ id: "w2", name: "Waybill-INV-009.pdf", uploadedAt: now(), fileUrl: "https://via.placeholder.com/150?text=Waybill-W2" }],
+    photoUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+    driverLicenseUrl: "#",
+    waybills: [{ id: "w2", name: "Waybill-INV-009.pdf", uploadedAt: now(), fileUrl: "#" }],
     carOwnerId: "co2",
     co_name: "Sahal Logistics",
     co_phone: "+25263 500 2222",
-    co_ownershipDocUrl: "https://via.placeholder.com/150?text=Ownership-O2",
+    co_ownershipDocUrl: "#",
   },
-    {
+  {
     id: "d3",
     name: "Omar Farah",
     address: "Borama Logistics Center",
     phone: "+25263 666 3344",
     status: "purchaser-reached",
     truckNumber: "SL-TRK-1050",
-    photoUrl: "https://via.placeholder.com/150?text=Driver+Photo",
-    driverLicenseUrl: "https://via.placeholder.com/150?text=License+DL-555",
-    waybills: [{ id: "w3", name: "Delivery Note.pdf", uploadedAt: now(), fileUrl: "https://via.placeholder.com/150?text=Waybill-W3" }],
+    photoUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    driverLicenseUrl: "#",
+    waybills: [{ id: "w3", name: "Delivery Note.pdf", uploadedAt: now(), fileUrl: "#" }],
     carOwnerId: "co3",
     co_name: "Geeska Transport",
     co_phone: "+25263 500 3333",
-    co_ownershipDocUrl: "https://via.placeholder.com/150?text=Ownership-O3",
+    co_ownershipDocUrl: "#",
   },
 ];
 
 const seedOwners = [
-  { id: SEED_OWNER_ID, name: "Abdi Buyer", location: "Hargeisa Market", phone: "+25263 600 1010", waybills: [] },
-  { id: "o2", name: "Zahra Import", location: "Borama", phone: "+25263 600 2020", waybills: [] },
+  { 
+    id: SEED_OWNER_ID, 
+    name: "Abdi Buyer Co.", 
+    location: "Hargeisa Market", 
+    phone: "+25263 600 1010", 
+    waybills: [],
+    email: "abdi@buyerco.com",
+    contactPerson: "Abdi Hassan"
+  },
+  { 
+    id: "o2", 
+    name: "Zahra Import Export", 
+    location: "Borama Trade Center", 
+    phone: "+25263 600 2020", 
+    waybills: [],
+    email: "info@zahraimport.com",
+    contactPerson: "Zahra Mohamed"
+  },
+  { 
+    id: "o3", 
+    name: "Somaliland Goods Ltd.", 
+    location: "Hargeisa Industrial Zone", 
+    phone: "+25263 600 3030", 
+    waybills: [],
+    email: "orders@somalilandgoods.com",
+    contactPerson: "Mohamed Ahmed"
+  },
 ];
 
 const seedTracks = [
@@ -78,1011 +122,317 @@ const seedTracks = [
 ];
 
 const seedUsers = [
-    { id: 'u1', username: 'admin', password: 'password123', role: 'admin' },
-    { id: 'u2', username: 'ahmed_ali', password: 'driver123', role: 'driver' },
-    { id: 'u3', username: 'abdi_buyer', password: 'owner123', role: 'owner' },
+    { id: 'u1', username: 'admin', password: 'password123', role: 'admin', name: 'System Administrator' },
+    { id: 'u2', username: 'ahmed_ali', password: 'driver123', role: 'driver', name: 'Ahmed Ali' },
+    { id: 'u3', username: 'abdi_buyer', password: 'owner123', role: 'owner', name: 'Abdi Hassan' },
 ];
 
-// Seed messages with a recipient ID (toId)
 const seedMessages = [
     { id: "m1", from: "owner", toId: SEED_DRIVER_ID, text: "Driver on the way to customs?", at: now() },
     { id: "m2", from: "driver", toId: "u1", text: "Yes, 10 minutes out from customs.", at: now() },
     { id: "m3", from: "admin", toId: "o2", text: "Zahra, please check your waybill upload.", at: now() },
 ];
 
+// --- STYLED COMPONENTS ----------------------------------------------------
 
-// --- HELPER COMPONENTS ------------------------------------------------------------------
+const Section = ({ title, children, className = "" }) => (
+  <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-6 ${className}`}>
+    {title && <h2 className="text-xl font-semibold text-gray-900 mb-4">{title}</h2>}
+    {children}
+  </div>
+);
 
-function Section({ title, children }) {
+const Card = ({ children, className = "" }) => (
+  <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-5 ${className}`}>
+    {children}
+  </div>
+);
+
+const Badge = ({ children, variant = "default", className = "" }) => {
+  const variants = {
+    default: "bg-gray-100 text-gray-800",
+    success: "bg-green-100 text-green-800",
+    warning: "bg-yellow-100 text-yellow-800",
+    error: "bg-red-100 text-red-800",
+    primary: "bg-blue-100 text-blue-800",
+    secondary: "bg-purple-100 text-purple-800"
+  };
+  
   return (
-    <section className="border border-gray-200 rounded-xl p-5 bg-white shadow-lg">
-      <h3 className="text-2xl font-bold text-gray-800 mb-4 border-b pb-2">{title}</h3>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
       {children}
-    </section>
+    </span>
   );
-}
-
-function ViewFileLink({ url, text }) {
-  if (!url) return <span className="text-gray-400">— N/A —</span>;
-  return (
-    <a 
-      href={url} 
-      target="_blank" 
-      rel="noreferrer" 
-      className="inline-flex items-center text-blue-600 hover:text-blue-800 underline font-medium text-sm transition"
-    >
-        📄 {text}
-    </a>
-  );
-}
-
-function WaybillWidget({ items, onUpload }) {
-  const [fileName, setFileName] = useState("");
-  const generateFileUrl = (name) => `https://via.placeholder.com/150?text=${name.replace(/\s/g, '+')}`;
-
-  return (
-    <div className="grid gap-3">
-      <div className="flex gap-3">
-        <input
-          className="flex-1 p-2.5 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-          placeholder="e.g., Waybill-INV-009.pdf"
-          value={fileName}
-          onChange={(e) => setFileName(e.target.value)}
-        />
-        <button
-          className="px-4 py-2 bg-indigo-500 text-white font-medium rounded-lg hover:bg-indigo-600 transition duration-150 disabled:bg-gray-400 disabled:cursor-not-allowed shadow-md text-sm"
-          onClick={() => {
-            if (!fileName.trim()) return;
-            onUpload({ 
-              id: crypto.randomUUID(), 
-              name: fileName.trim(), 
-              uploadedAt: now(),
-              fileUrl: generateFileUrl(fileName.trim())
-            });
-            setFileName("");
-          }}
-          disabled={!fileName.trim()}
-        >
-          Upload
-        </button>
-      </div>
-
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="text-left p-3 font-semibold text-gray-700">Document</th>
-              <th className="text-left p-3 font-semibold text-gray-700">Uploaded</th>
-              <th className="text-left p-3 font-semibold text-gray-700">View</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((w) => (
-              <tr key={w.id} className="border-b border-gray-100 hover:bg-gray-100 transition duration-100">
-                <td className="p-3 text-gray-800 truncate max-w-xs">{w.name}</td>
-                <td className="p-3 text-gray-500 text-xs">
-                  {new Date(w.uploadedAt).toLocaleDateString()}
-                </td>
-                <td className="p-3">
-                  <ViewFileLink url={w.fileUrl} text="View PDF" />
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr>
-                <td colSpan="3" className="text-gray-500 text-center py-4">
-                  No waybills yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-function Text({ label, value, onChange, type = "text" }) {
-  return (
-    <label className="grid gap-1.5">
-      <span className="text-xs font-semibold text-gray-700">{label}</span>
-      <input
-        type={type}
-        className="p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      />
-    </label>
-  );
-}
-
-function Select({ label, value, onChange, options }) {
-  return (
-    <label className="grid gap-1.5">
-      <span className="text-xs font-semibold text-gray-700">{label}</span>
-      <select
-        className="p-2.5 border border-gray-300 rounded-lg bg-white text-sm focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map((o) => (
-          <option key={o} value={o}>
-            {o.split('-').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function FormGrid({ children, cols = 3 }) {
-  const columnsClass = `grid-cols-1 sm:grid-cols-2 lg:grid-cols-${cols}`;
-  return <div className={`grid ${columnsClass} gap-4`}>{children}</div>;
-}
-
-// --- HEADER COMPONENT -----------------------------------------------------------------
-
-function Header({ user }) {
-  // Use username's first word for welcome and initial for avatar
-  const displayName = user.username.split('_')[0]; 
-  const avatarInitial = user.username.charAt(0).toUpperCase();
-
-  return (
-    <header className="flex justify-between items-center p-6 bg-white rounded-xl shadow-lg mb-8 border border-gray-200">
-      <h1 className="text-3xl font-light text-gray-700">
-        Welcome Back, <span className="font-bold text-indigo-600 capitalize">{displayName}</span>!
-      </h1>
-      <div className="flex items-center space-x-4">
-        <div className="text-right">
-          <div className="font-bold text-lg text-gray-800 capitalize">{user.username}</div>
-          <div className={`text-sm font-medium ${user.role === 'admin' ? 'text-red-500' : 'text-gray-500'} capitalize`}>
-            {user.role}
-          </div>
-        </div>
-        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-semibold text-xl border-2 border-indigo-500">
-            {avatarInitial}
-        </div>
-      </div>
-    </header>
-  );
-}
-
-// --- ADMIN USER MANAGEMENT PANEL (Kept the same) --------------------------------------------
-
-function AdminUserManagement({ users, setUsers }) {
-    const [newUser, setNewUser] = useState({ username: '', password: '', role: 'driver' });
-    const [resetUser, setResetUser] = useState({ id: '', newPassword: '' });
-    const roles = ['admin', 'driver', 'owner'];
-
-    const handleCreateUser = () => {
-        if (!newUser.username || !newUser.password) return;
-        setUsers(prev => [...prev, { id: crypto.randomUUID(), ...newUser }]);
-        setNewUser({ username: '', password: '', role: 'driver' });
-    };
-
-    const handleResetPassword = () => {
-        if (!resetUser.id || !resetUser.newPassword) return;
-        setUsers(prev => prev.map(u => 
-            u.id === resetUser.id ? { ...u, password: resetUser.newPassword } : u
-        ));
-        setResetUser({ id: '', newPassword: '' });
-    };
-
-    return (
-        <Section title="Admin User Management">
-            <div className="grid gap-6">
-                {/* Create New User */}
-                <div className="border border-gray-200 p-4 rounded-xl bg-indigo-50">
-                    <h4 className="font-bold text-xl text-indigo-700 mb-4">Create New User Account</h4>
-                    <FormGrid cols={4}>
-                        <Text label="Username" value={newUser.username} onChange={(v) => setNewUser({ ...newUser, username: v })} />
-                        <Text label="Initial Password" value={newUser.password} onChange={(v) => setNewUser({ ...newUser, password: v })} type="password" />
-                        <Select label="Role" value={newUser.role} onChange={(v) => setNewUser({ ...newUser, role: v })} options={roles} />
-                        <div className="flex items-end">
-                            <button
-                                onClick={handleCreateUser}
-                                disabled={!newUser.username || !newUser.password}
-                                className="w-full px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-150 disabled:bg-gray-400 shadow-md"
-                            >
-                                Create User
-                            </button>
-                        </div>
-                    </FormGrid>
-                </div>
-
-                {/* Reset Password */}
-                <div className="border border-gray-200 p-4 rounded-xl bg-yellow-50">
-                    <h4 className="font-bold text-xl text-yellow-700 mb-4">Reset User Password</h4>
-                    <FormGrid cols={3}>
-                        <Select 
-                            label="Select User" 
-                            value={resetUser.id} 
-                            onChange={(v) => setResetUser({ ...resetUser, id: v })} 
-                            options={['', ...users.map(u => u.id)]}
-                        />
-                        <Text 
-                            label="New Password" 
-                            value={resetUser.newPassword} 
-                            onChange={(v) => setResetUser({ ...resetUser, newPassword: v })} 
-                            type="password"
-                        />
-                         <div className="flex items-end">
-                            <button
-                                onClick={handleResetPassword}
-                                disabled={!resetUser.id || !resetUser.newPassword}
-                                className="w-full px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-150 disabled:bg-gray-400 shadow-md"
-                            >
-                                Reset Password
-                            </button>
-                        </div>
-                    </FormGrid>
-                </div>
-
-                {/* User List */}
-                <div className="overflow-x-auto border border-gray-200 rounded-lg">
-                    <table className="w-full border-collapse text-sm">
-                        <thead>
-                            <tr className="border-b border-gray-200 bg-gray-50">
-                                <th className="text-left p-3 font-semibold text-gray-700">Username</th>
-                                <th className="text-left p-3 font-semibold text-gray-700">Role</th>
-                                <th className="text-left p-3 font-semibold text-gray-700">ID</th>
-                                <th className="text-left p-3 font-semibold text-gray-700">Password (Simulated)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {users.map((u) => (
-                                <tr key={u.id} className="border-b border-gray-100 hover:bg-gray-50 transition duration-100">
-                                    <td className="p-3 font-medium text-gray-900">{u.username}</td>
-                                    <td className="p-3 text-gray-600 capitalize">{u.role}</td>
-                                    <td className="p-3 text-gray-600 text-xs">{u.id}</td>
-                                    <td className="p-3 text-red-500 font-mono text-xs">{u.password}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </Section>
-    );
-}
-
-// --- SIDEBAR COMPONENT (New 'Contact Us' tab added) -----------------------------------------------------------------
-
-const Sidebar = ({ currentTab, setTab }) => { 
-    const navItems = [
-        { id: "dashboard", label: "Dashboard", icon: "🏠" },
-        { id: "available tracks", label: "Available Tracks", icon: "🚚" },
-        { id: "driver", label: "Driver Management", icon: "👨‍💼" },
-        { id: "owner", label: "Owner/Purchaser View", icon: "📦" },
-        { id: "chat", label: "Messaging/Chat", icon: "💬" },
-        { id: "contact", label: "Contact Us", icon: "📞" }, // NEW ITEM
-        { id: "admin", label: "Admin Tools", icon: "⚙️" },
-    ];
-
-    return (
-        <div className="w-64 bg-indigo-800 text-white h-screen p-5 flex flex-col sticky top-0">
-            {/* Logo/Title */}
-            <div className="font-extrabold text-2xl text-white mb-8 border-b border-indigo-700 pb-4">HeeyLogistic</div>
-
-            {/* Navigation */}
-            <nav className="flex-1 space-y-2">
-                {navItems.map((item) => (
-                    <button
-                        key={item.id}
-                        onClick={() => setTab(item.id)}
-                        className={`w-full text-left flex items-center p-3 rounded-lg transition duration-200 ${
-                            currentTab === item.id
-                                ? "bg-indigo-700 shadow-md font-bold"
-                                : "hover:bg-indigo-700/50"
-                        } capitalize`}
-                    >
-                        <span className="mr-3">{item.icon}</span>
-                        {item.label}
-                    </button>
-                ))}
-            </nav>
-        </div>
-    );
 };
 
-// --- CHAT COMPONENT (Kept the same) -----------------------------------------------------------------
-
-function Chat({ messages, onSend, drivers, owners, adminUserId }) {
-    const [text, setText] = useState("");
-    const [selectedRecipientId, setSelectedRecipientId] = useState(null);
-
-    const allRecipients = [
-        ...drivers.map(d => ({ id: d.id, name: d.name, type: 'Driver' })),
-        ...owners.map(o => ({ id: o.id, name: o.name, type: 'Owner' })),
-    ];
-
-    const recipient = allRecipients.find(r => r.id === selectedRecipientId);
-
-    // Filter messages relevant to the current conversation:
-    // 1. Messages FROM the selected recipient (to the admin)
-    // 2. Messages TO the selected recipient (from the admin)
-    // 3. (Simplification) Messages FROM the selected recipient TO another entity, but we show them for context
-    const filteredMessages = messages.filter(m => 
-        (m.from !== 'admin' && (m.toId === adminUserId || m.from === recipient?.type.toLowerCase())) ||
-        (m.from === 'admin' && m.toId === selectedRecipientId)
-    ).sort((a, b) => new Date(a.at) - new Date(b.at)); // Sort by time
-
-    const handleSend = () => {
-        if (!text.trim() || !selectedRecipientId) return;
-        
-        // The admin sends the message TO the selected recipient's ID
-        onSend({
-            id: crypto.randomUUID(), 
-            from: "admin", 
-            toId: selectedRecipientId, 
-            text: text.trim(), 
-            at: now()
-        });
-        setText("");
-    };
-
-    return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Recipient List */}
-            <div className="lg:col-span-1 border border-gray-200 rounded-xl p-4 bg-gray-50 max-h-[700px] overflow-y-auto">
-                <h4 className="font-bold text-xl text-gray-800 mb-3 border-b pb-2">Select Recipient</h4>
-                {allRecipients.map((r) => (
-                    <button
-                        key={r.id}
-                        onClick={() => setSelectedRecipientId(r.id)}
-                        className={`w-full text-left p-3 mb-2 rounded-lg transition duration-200 border ${
-                            selectedRecipientId === r.id
-                                ? "bg-indigo-600 text-white shadow-md border-indigo-700"
-                                : "bg-white text-gray-800 hover:bg-gray-100 border-gray-200"
-                        }`}
-                    >
-                        <div className="font-semibold">{r.name}</div>
-                        <div className={`text-sm ${selectedRecipientId === r.id ? "text-indigo-200" : "text-gray-500"}`}>{r.type}</div>
-                    </button>
-                ))}
-            </div>
-
-            {/* Chat Window */}
-            <div className="lg:col-span-2 grid gap-4">
-                <div className="h-96 overflow-y-auto border border-gray-300 rounded-lg p-3 bg-gray-50 shadow-inner flex flex-col-reverse">
-                    {recipient ? (
-                        filteredMessages.slice().reverse().map((m) => (
-                            <div
-                                key={m.id}
-                                className={`mb-2 p-3 max-w-[80%] rounded-xl shadow-md ${
-                                    m.from === "admin"
-                                        ? "ml-auto bg-indigo-500 text-white"
-                                        : m.from === "driver"
-                                        ? "mr-auto bg-yellow-100 text-gray-800 border border-yellow-200"
-                                        : "mr-auto bg-gray-200 text-gray-800 border border-gray-300"
-                                }`}
-                            >
-                                <div className={`text-xs font-semibold mb-0.5 capitalize ${m.from === "admin" ? "text-indigo-100" : "text-gray-600"}`}>
-                                    {m.from} · <span className="font-normal text-[10px]">{new Date(m.at).toLocaleTimeString()}</span>
-                                </div>
-                                <div className="text-sm">{m.text}</div>
-                            </div>
-                        ))
-                    ) : (
-                        <div className="text-gray-500 text-center py-4 self-center">
-                            Please select a Driver or Owner to start a conversation.
-                        </div>
-                    )}
-                    
-                    {filteredMessages.length === 0 && recipient && (
-                        <div className="text-gray-500 text-center py-4 self-center">
-                            No messages in this conversation yet.
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex gap-3">
-                    <input
-                        className="flex-1 p-2.5 border border-gray-300 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-                        placeholder={recipient ? `Message ${recipient.name} (${recipient.type})...` : "Select a recipient first..."}
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter" && text.trim() && selectedRecipientId) {
-                                handleSend();
-                            }
-                        }}
-                        disabled={!selectedRecipientId}
-                    />
-                    <button
-                        disabled={!text.trim() || !selectedRecipientId}
-                        onClick={handleSend}
-                        className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition duration-150 disabled:bg-gray-400 shadow-md"
-                    >
-                        Send
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// --- DRIVER LIST COMPONENT (Kept the same) -----------------------------------------------------------------
-
-function DriverList({ drivers, assignStatus, setDrivers }) {
-
-    const getStatusClasses = (status) => {
-        switch (status) {
-            case 'idle':
-                return 'bg-gray-100 text-gray-700';
-            case 'custom-reached':
-                return 'bg-yellow-100 text-yellow-700';
-            case 'purchaser-reached':
-                return 'bg-green-100 text-green-700';
-            default:
-                return 'bg-gray-200 text-gray-800';
-        }
-    };
-    
-    return (
-      <div className="grid gap-6">
-        {drivers.map((d) => (
-          <div key={d.id} className="border border-gray-200 rounded-xl p-6 bg-white shadow-xl hover:shadow-2xl transition duration-300">
-            {/* Header: Driver Info & Status */}
-            <div className="flex justify-between items-start flex-wrap gap-4 border-b pb-4 mb-4">
-              <div className="flex items-center gap-4">
-                <img 
-                    src={d.photoUrl} 
-                    alt={`${d.name} photo`} 
-                    className="w-16 h-16 rounded-full object-cover border-4 border-indigo-500 shadow-md" 
-                />
-                <div>
-                  <div className="font-extrabold text-2xl text-gray-900">{d.name}</div>
-                  <div className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-                    <span className="font-semibold text-indigo-600">🚚 {d.truckNumber}</span>
-                    <span>|</span>
-                    <span>📞 {d.phone}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex flex-col items-end gap-2">
-                {/* Status Badge */}
-                <span className={`px-4 py-1 rounded-full text-sm font-bold capitalize whitespace-nowrap ${getStatusClasses(d.status)} shadow-sm`}>
-                  {d.status.replace("-", " ")}
-                </span>
-                {/* Status Update Dropdown */}
-                <select
-                  value={d.status}
-                  onChange={(e) => assignStatus(d.id, e.target.value)}
-                  className="p-2 border border-indigo-300 rounded-lg text-sm bg-indigo-50 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 cursor-pointer"
-                >
-                  <option value="idle">Set Idle</option>
-                  <option value="custom-reached">Set Customs Reached</option>
-                  <option value="purchaser-reached">Set Purchaser Reached</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Body: Documents, Owner, and Waybills */}
-            <div className="grid lg:grid-cols-3 gap-6">
-              
-              {/* Documents & Owner Info */}
-              <div className="lg:col-span-1 space-y-4">
-                <div className="font-bold text-lg text-indigo-700 border-b pb-1">Car Owner & Documents</div>
-                <div className="p-3 bg-indigo-50 rounded-lg border border-indigo-100">
-                    <div className="font-semibold text-gray-800">{d.co_name}</div>
-                    <div className="text-sm text-gray-600">{d.co_phone}</div>
-                </div>
-                
-                <div className="space-y-2">
-                    <div className="text-sm font-medium text-gray-700">Driver License:</div>
-                    <div className="pl-2">
-                        <ViewFileLink url={d.driverLicenseUrl} text="View Driver License" />
-                    </div>
-                    <div className="text-sm font-medium text-gray-700 pt-1">Ownership Document:</div>
-                    <div className="pl-2">
-                        <ViewFileLink url={d.co_ownershipDocUrl} text="View Ownership Doc" />
-                    </div>
-                </div>
-              </div>
-
-              {/* Waybills Widget */}
-              <div className="lg:col-span-2">
-                <div className="font-bold text-lg text-indigo-700 border-b pb-1 mb-3">Waybills Management</div>
-                <WaybillWidget
-                  items={d.waybills}
-                  onUpload={(w) =>
-                    setDrivers((all) => all.map((x) => (x.id === d.id ? { ...x, waybills: [w, ...x.waybills] } : x)))
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-        {drivers.length === 0 && (
-             <div className="text-center p-8 text-gray-500 border border-gray-200 rounded-xl bg-white shadow-lg">
-                No drivers registered yet.
-             </div>
-        )}
-      </div>
-    );
-  }
-
-// --- NEW CONTACT US COMPONENT -----------------------------------------------------------------
-
-function ContactUs() {
-    // Contact details provided by the user
-    const CONTACT_DETAILS = {
-        emails: ["info@heeylogistic.com", "support@heeylogistic.com"],
-        phones: ["+251 15151601", "+251 991927628"],
-        location: "Addis Ababa, near Daralasam Hotel",
-    };
-
-    const contactItemClass = "flex items-start p-4 bg-indigo-50 rounded-lg shadow-sm border border-indigo-200";
-    const iconClass = "text-2xl text-indigo-600 mr-4 mt-1";
-    const linkClass = "text-indigo-600 hover:text-indigo-800 font-medium transition duration-150";
-
-    return (
-        <Section title="Reach Our Customer Support">
-            <p className="text-lg text-gray-600 mb-8">
-                For immediate assistance, support, or inquiries regarding our logistics services, please use the contact details below.
-            </p>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                {/* Email Section */}
-                <div className={contactItemClass}>
-                    <span className={iconClass}>📧</span>
-                    <div>
-                        <h4 className="font-bold text-gray-800 text-xl mb-2">Email Support</h4>
-                        <div className="space-y-1">
-                            {CONTACT_DETAILS.emails.map((email) => (
-                                <p key={email}>
-                                    <a href={`mailto:${email}`} className={linkClass}>
-                                        {email}
-                                    </a>
-                                </p>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Phone Section */}
-                <div className={contactItemClass}>
-                    <span className={iconClass}>📞</span>
-                    <div>
-                        <h4 className="font-bold text-gray-800 text-xl mb-2">Phone Numbers</h4>
-                        <div className="space-y-1">
-                            {CONTACT_DETAILS.phones.map((phone) => (
-                                <p key={phone}>
-                                    <a href={`tel:${phone.replace(/\s/g, '')}`} className={linkClass}>
-                                        {phone}
-                                    </a>
-                                </p>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Location Section */}
-                <div className={contactItemClass}>
-                    <span className={iconClass}>📍</span>
-                    <div>
-                        <h4 className="font-bold text-gray-800 text-xl mb-2">Our Location</h4>
-                        <p className="text-gray-700">
-                            {CONTACT_DETAILS.location}
-                        </p>
-                        <p className="text-sm text-gray-500 mt-1">
-                             (Addis Ababa, near Daralasam Hotel)
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </Section>
-    );
-}
-
-// --- MAIN APP COMPONENT (New 'contact' case added to switch) -----------------------------------------------------------------
-
-export default function App() {
-  const [drivers, setDrivers] = useState(seedDrivers);
-  const [owners, setOwners] = useState(seedOwners);
-  const [tracks, setTracks] = useState(seedTracks);
-  const [users, setUsers] = useState(seedUsers);
-  const [tab, setTab] = useState("dashboard"); // Default to dashboard
-
-  const ADMIN_USER_ID = 'u1'; // Assume the admin user ID is 'u1'
-  const [messages, setMessages] = useState(seedMessages);
+const Button = ({ children, variant = "primary", size = "md", ...props }) => {
+  const baseClasses = "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
   
-  // Find the currently logged-in user (Admin in this demo)
-  const currentUser = useMemo(() => users.find(u => u.id === ADMIN_USER_ID), [users]);
-
-
-  const totals = {
-    tracks: tracks.length,
-    drivers: drivers.length,
-    owners: owners.length,
-    availableTracks: tracks.filter((t) => t.isAvailable).length,
+  const variants = {
+    primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
+    secondary: "bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500",
+    success: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-500",
+    warning: "bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500",
+    error: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
+    outline: "border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-blue-500"
   };
-
-  const assignStatus = (driverId, status) => {
-    setDrivers((d) => d.map((x) => (x.id === driverId ? { ...x, status } : x)));
+  
+  const sizes = {
+    sm: "px-3 py-1.5 text-sm",
+    md: "px-4 py-2 text-sm",
+    lg: "px-6 py-3 text-base"
   };
+  
+  return (
+    <button 
+      className={`${baseClasses} ${variants[variant]} ${sizes[size]}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+};
 
-  const statCardClass = "p-5 bg-white rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition duration-200";
-  const statTitleClass = "text-sm font-medium text-gray-500";
-  const statValueClass = "text-4xl font-extrabold text-indigo-600 mt-2";
+const Input = ({ label, ...props }) => (
+  <div className="space-y-1">
+    {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
+    <input 
+      className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+      {...props}
+    />
+  </div>
+);
 
+const Select = ({ label, options, ...props }) => (
+  <div className="space-y-1">
+    {label && <label className="block text-sm font-medium text-gray-700">{label}</label>}
+    <select 
+      className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
+      {...props}
+    >
+      {options.map(option => (
+        <option key={option.value} value={option.value}>{option.label}</option>
+      ))}
+    </select>
+  </div>
+);
 
-  // --- Render Functions for different tabs ---
-  const renderContent = () => {
-    switch (tab) {
-        case 'dashboard':
-            return (
-                <div className="grid gap-6">
-                    <h2 className="text-3xl font-bold text-gray-800">Dashboard Overview</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className={statCardClass}>
-                            <div className={statTitleClass}>Total Tracks</div>
-                            <div className={statValueClass}>{totals.tracks}</div>
-                        </div>
-                        <div className={statCardClass}>
-                            <div className={statTitleClass}>Drivers</div>
-                            <div className={statValueClass}>{totals.drivers}</div>
-                        </div>
-                        <div className={statCardClass}>
-                            <div className={statTitleClass}>Owners</div>
-                            <div className={statValueClass}>{totals.owners}</div>
-                        </div>
-                        <div className={statCardClass}>
-                            <div className={statTitleClass}>Available Tracks</div>
-                            <div className="text-4xl font-extrabold text-green-600 mt-2">{totals.availableTracks}</div>
-                        </div>
-                    </div>
-                    {/* Chat removed from dashboard */}
-                    <div className="grid lg:grid-cols-2 gap-6">
-                        <ManageTracks 
-                            tracks={tracks.slice(0, 3)} 
-                            onToggle={(id) => setTracks((all) => all.map((t) => (t.id === id ? { ...t, isAvailable: !t.isAvailable } : t)))} 
-                        />
-                    </div>
-                </div>
-            );
-        case 'available tracks':
-            return (
-                <Section title="Available Tracks (Ready to Assign)">
-                    <AvailableTracks tracks={tracks.filter(t => t.isAvailable)} drivers={drivers} />
-                </Section>
-            );
-        case 'driver':
-            return (
-                <Section title="Driver Management">
-                    {/* The re-designed DriverList is used here */}
-                    <DriverList drivers={drivers} assignStatus={assignStatus} setDrivers={setDrivers} />
-                </Section>
-            );
-        case 'owner':
-            return (
-                <Section title="Owner/Purchaser Status View">
-                    <OwnerList owners={owners} drivers={drivers} setOwners={setOwners} />
-                </Section>
-            );
-        case 'chat': // NEW CHAT TAB
-            const addMessage = (message) => setMessages((m) => [...m, message]);
-            return (
-                <Section title="Live Messaging (Admin to Driver/Owner)">
-                    <Chat 
-                        messages={messages} 
-                        onSend={addMessage} 
-                        drivers={drivers}
-                        owners={owners}
-                        adminUserId={ADMIN_USER_ID}
-                    />
-                </Section>
-            );
-        case 'contact': // NEW CONTACT TAB
-            return <ContactUs />;
-            
-        case 'admin':
-            return <AdminPanel 
-                        drivers={drivers} 
-                        setDrivers={setDrivers} 
-                        owners={owners} 
-                        setOwners={setOwners} 
-                        tracks={tracks} 
-                        setTracks={setTracks} 
-                        messages={messages} 
-                        setMessages={setMessages} 
-                        users={users} 
-                        setUsers={setUsers} 
-                    />;
-        default:
-            return <div className="p-8 text-gray-500">Select a navigation item.</div>;
-    }
+// --- SIDEBAR COMPONENT ----------------------------------------------------
+
+const Sidebar = ({ currentTab, setTab }) => {
+  const menuItems = [
+    { id: "dashboard", label: "Dashboard", icon: BarChart3 },
+    { id: "drivers", label: "Driver Management", icon: User },
+    { id: "owners", label: "Client Management", icon: Truck },
+    { id: "fleet", label: "Fleet Tracking", icon: Car },
+    { id: "messages", label: "Messages", icon: MessageCircle },
+    { id: "documents", label: "Documents", icon: FileText },
+    { id: "settings", label: "Settings", icon: SettingsIcon },
+  ];
+
+  return (
+    <div className="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white h-screen flex flex-col">
+      {/* Logo */}
+      <div className="p-6 border-b border-blue-700">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+            <Truck className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold">HeeyLogistics</h1>
+            <p className="text-blue-200 text-xs">Admin Dashboard</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 p-4 space-y-1">
+        {menuItems.map(item => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              onClick={() => setTab(item.id)}
+              className={`w-full flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+                currentTab === item.id 
+                  ? "bg-blue-700 text-white shadow-md" 
+                  : "text-blue-100 hover:bg-blue-700/50 hover:text-white"
+              }`}
+            >
+              <Icon className="w-5 h-5 mr-3" />
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* User Section */}
+      <div className="p-4 border-t border-blue-700">
+        <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-700/30">
+          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+            <span className="text-sm font-semibold">A</span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">Admin User</p>
+            <p className="text-xs text-blue-200 truncate">Administrator</p>
+          </div>
+          <Button variant="outline" size="sm" className="!text-blue-200 !border-blue-600">
+            <LogOut className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- HEADER COMPONENT ----------------------------------------------------
+
+const Header = ({ title, actions }) => {
+  return (
+    <div className="flex justify-between items-center mb-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+        <p className="text-gray-600">Manage your logistics operations efficiently</p>
+      </div>
+      <div className="flex items-center space-x-4">
+        <div className="relative">
+          <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+        <Button variant="outline" size="sm">
+          <Bell className="w-4 h-4 mr-2" />
+          Notifications
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+// --- DASHBOARD COMPONENT -------------------------------------------------
+
+const Dashboard = ({ stats, recentActivities }) => {
+  return (
+    <div className="space-y-6">
+      <Header title="Dashboard Overview" />
+      
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, index) => (
+          <Card key={index} className="text-center">
+            <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center mx-auto mb-3`}>
+              <stat.icon className="w-6 h-6 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900">{stat.value}</h3>
+            <p className="text-gray-600">{stat.label}</p>
+            <p className={`text-sm mt-1 ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {stat.change >= 0 ? '↑' : '↓'} {Math.abs(stat.change)}% from last month
+            </p>
+          </Card>
+        ))}
+      </div>
+
+      {/* Recent Activities */}
+      <Section title="Recent Activities">
+        <div className="space-y-4">
+          {recentActivities.map((activity, index) => (
+            <div key={index} className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.bgColor}`}>
+                <activity.icon className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-gray-900">{activity.title}</p>
+                <p className="text-sm text-gray-600">{activity.description}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-gray-500">{activity.time}</p>
+                <Badge variant={activity.statusVariant}>{activity.status}</Badge>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Section>
+    </div>
+  );
+};
+
+// --- DRIVER MANAGEMENT COMPONENT -----------------------------------------
+
+const DriverManagement = ({ drivers, onUpdateStatus }) => {
+  const statusOptions = [
+    { value: "idle", label: "Idle", color: "gray" },
+    { value: "loading", label: "Loading", color: "yellow" },
+    { value: "in-transit", label: "In Transit", color: "blue" },
+    { value: "custom-reached", label: "Customs Reached", color: "purple" },
+    { value: "unloading", label: "Unloading", color: "red" },
+    { value: "purchaser-reached", label: "Purchaser Reached", color: "green" }
+  ];
+
+  const getStatusColor = (status) => {
+    const option = statusOptions.find(opt => opt.value === status);
+    return option ? option.color : "gray";
   };
 
   return (
-    <div className="flex min-h-screen">
-        <Sidebar currentTab={tab} setTab={setTab} />
-        
-        <main className="flex-1 bg-gray-100 p-8 max-w-5xl mx-auto">
-            {/* Header component showing user profile and role */}
-            {currentUser && <Header user={currentUser} />}
-
-            {renderContent()}
-
-            <footer className="text-center text-gray-500 text-sm mt-8 pt-4 border-t border-gray-200">
-                © {new Date().getFullYear()} HeeyLogistic. All rights reserved. • Demo UI
-            </footer>
-        </main>
-    </div>
-  );
-}
-
-// --- ADMIN PANEL COMPONENT (Kept the same) ----------------------------------------------------
-
-function AdminPanel({ drivers, setDrivers, owners, setOwners, tracks, setTracks, messages, setMessages, users, setUsers }) {
-    const [adminTab, setAdminTab] = useState("creation");
-
-    const adminNavItems = [
-        { id: "creation", label: "Create Driver & Owner" },
-        { id: "tracks", label: "Manage Tracks" },
-        { id: "users", label: "User Management" },
-    ];
-
-    const renderAdminContent = () => {
-        switch (adminTab) {
-            case 'creation':
-                return (
-                    <div className="grid gap-6">
-                        <DriverForm onCreate={(d) => {
-                            const newDriver = { 
-                                id: crypto.randomUUID(), 
-                                ...d, 
-                                waybills: [], 
-                                carOwnerId: crypto.randomUUID()
-                            };
-                            setDrivers((prev) => [newDriver, ...prev]);
-
-                            setTracks(prev => [...prev, {
-                                id: crypto.randomUUID(),
-                                plate: d.truckNumber,
-                                model: 'Unspecified Model',
-                                isAvailable: true,
-                                carOwnerId: newDriver.carOwnerId,
-                                assignedDriverId: newDriver.id
-                            }]);
-
-                            // Optionally create a user for the new driver
-                            setUsers(prev => [...prev, { id: crypto.randomUUID(), username: d.name.toLowerCase().replace(/\s/g, '_'), password: 'defaultpassword', role: 'driver' }]);
-                        }} />
-                        <CreateOwner onCreate={(o) => {
-                            setOwners((prev) => [{ id: crypto.randomUUID(), ...o, waybills: [] }, ...prev]);
-                            // Optionally create a user for the new owner
-                            setUsers(prev => [...prev, { id: crypto.randomUUID(), username: o.name.toLowerCase().replace(/\s/g, '_'), password: 'defaultpassword', role: 'owner' }]);
-                        }} />
-                    </div>
-                );
-            case 'tracks':
-                return (
-                    <div className="grid gap-6"> 
-                        <ManageTracks tracks={tracks} onToggle={(id) => setTracks((all) => all.map((t) => (t.id === id ? { ...t, isAvailable: !t.isAvailable } : t)))} />
-                        {/* Chat removed from Admin Tracks */}
-                    </div>
-                );
-            case 'users':
-                return <AdminUserManagement users={users} setUsers={setUsers} />;
-            default:
-                return null;
-        }
-    };
-
-    return (
-        <div className="grid gap-6">
-            <h2 className="text-3xl font-bold text-gray-800 border-b pb-2">Admin Tools</h2>
-            {/* Admin Sub-Tabs */}
-            <div className="flex flex-wrap gap-2 p-1 bg-white rounded-xl shadow-md border border-gray-200">
-                {adminNavItems.map((t) => (
-                    <button
-                        key={t.id}
-                        onClick={() => setAdminTab(t.id)}
-                        className={`px-4 py-2 text-base font-semibold rounded-lg transition duration-200 ${
-                            adminTab === t.id
-                                ? "bg-indigo-600 text-white shadow-lg"
-                                : "text-gray-700 hover:bg-gray-100"
-                        } capitalize whitespace-nowrap`}
-                    >
-                        {t.label}
-                    </button>
-                ))}
-            </div>
-            {renderAdminContent()}
-        </div>
-    );
-}
-
-
-// --- Helper Components (DriverForm, CreateOwner, AvailableTracks, OwnerList, ManageTracks - Kept the same) ---
-
-function DriverForm({ onCreate }) {
-    const [f, setF] = useState({ 
-      name: "", address: "", phone: "", truckNumber: "", status: "idle",
-      driverLicenseUrl: "", photoUrl: "",
-      co_name: "", co_phone: "", co_ownershipDocUrl: "" 
-    });
-    
-    const isFormValid = f.name && f.phone && f.truckNumber && f.driverLicenseUrl && f.co_name;
-  
-    const UrlInput = ({ label, field }) => (
-      <Text 
-        label={`${label} (URL/Link)`} 
-        value={f[field]} 
-        onChange={(v) => setF({ ...f, [field]: v })} 
+    <div className="space-y-6">
+      <Header 
+        title="Driver Management" 
+        actions={
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            Add New Driver
+          </Button>
+        } 
       />
-    );
-  
-    return (
-      <Section title="Create New Driver & Car Owner">
-        <div className="space-y-6">
-          <h4 className="text-lg font-bold text-indigo-700">Driver Details</h4>
-          <FormGrid>
-            <Text label="Full Name" value={f.name} onChange={(v) => setF({ ...f, name: v })} />
-            <Text label="Address" value={f.address} onChange={(v) => setF({ ...f, address: v })} />
-            <Text label="Phone Number" value={f.phone} onChange={(v) => setF({ ...f, phone: v })} />
-            <Text label="Truck Number (Plate)" value={f.truckNumber} onChange={(v) => setF({ ...f, truckNumber: v })} />
-            <UrlInput label="Driver Photo" field="photoUrl" />
-            <UrlInput label="Driver License Document" field="driverLicenseUrl" />
-            <Select label="Initial Status" value={f.status} onChange={(v) => setF({ ...f, status: v })} options={["idle","custom-reached","purchaser-reached"]} />
-          </FormGrid>
-  
-          <h4 className="text-lg font-bold text-indigo-700 pt-4 border-t border-gray-100">Car Owner Details</h4>
-          <FormGrid>
-            <Text label="Car Owner Name" value={f.co_name} onChange={(v) => setF({ ...f, co_name: v })} />
-            <Text label="Car Owner Phone" value={f.co_phone} onChange={(v) => setF({ ...f, co_phone: v })} />
-            <UrlInput label="Car Ownership Document" field="co_ownershipDocUrl" />
-          </FormGrid>
-        </div>
-  
-        <div className="text-right mt-6">
-          <button
-            onClick={() => { 
-              isFormValid && onCreate(f); 
-              setF({ 
-                name: "", address: "", phone: "", truckNumber: "", status: "idle",
-                driverLicenseUrl: "", photoUrl: "",
-                co_name: "", co_phone: "", co_ownershipDocUrl: ""
-              }); 
-            }}
-            disabled={!isFormValid}
-            className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition duration-150 disabled:bg-gray-400 shadow-md"
-          >
-            Register Driver & Owner
-          </button>
-        </div>
-      </Section>
-    );
-  }
-  
-  function CreateOwner({ onCreate }) {
-    const [f, setF] = useState({ name: "", location: "", phone: "" });
-    const isFormValid = f.name && f.location && f.phone;
-  
-    return (
-      <Section title="Create New Owner (Purchaser)">
-        <FormGrid cols={2}>
-          <Text label="Name" value={f.name} onChange={(v) => setF({ ...f, name: v })} />
-          <Text label="Location" value={f.location} onChange={(v) => setF({ ...f, location: v })} />
-          <Text label="Phone" value={f.phone} onChange={(v) => setF({ ...f, phone: v })} />
-        </FormGrid>
-        <div className="text-right mt-6">
-          <button
-            onClick={() => { isFormValid && onCreate(f); setF({ name: "", location: "", phone: "" }); }}
-            disabled={!isFormValid}
-            className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition duration-150 disabled:bg-gray-400 shadow-md"
-          >
-            Add Owner
-          </button>
-        </div>
-      </Section>
-    );
-  }
-  
-  function AvailableTracks({ tracks }) {
-    return (
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="text-left p-3 font-semibold text-gray-700">Plate Number</th>
-              <th className="text-left p-3 font-semibold text-gray-700">Model</th>
-              <th className="text-left p-3 font-semibold text-gray-700">Assigned Driver</th>
-              <th className="text-left p-3 font-semibold text-gray-700">Owner Phone</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tracks.map((t) => (
-              <tr key={t.id} className="border-b border-gray-100 hover:bg-green-50 transition duration-100">
-                <td className="p-3 font-medium text-gray-900">{t.plate}</td>
-                <td className="p-3 text-gray-600">{t.model ?? "—"}</td>
-                <td className="p-3 text-gray-600">{t.assignedDriverId ? "Assigned" : "Unassigned"}</td>
-                <td className="p-3 text-gray-600">N/A (See Driver Details)</td>
-              </tr>
-            ))}
-            {tracks.length === 0 && (
+      
+      <Section>
+        <div className="overflow-hidden rounded-lg border border-gray-200">
+          <table className="w-full">
+            <thead className="bg-gray-50">
               <tr>
-                <td colSpan="4" className="text-center text-gray-500 py-6">
-                  No available tracks right now.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    );
-  }
-  
-  function OwnerList({ owners, drivers, setOwners }) {
-    const latestDriverStatus = drivers.find(d => d.status !== 'idle')?.status || drivers[0]?.status || 'no driver assigned';
-  
-    return (
-      <div className="grid gap-6">
-        {owners.map((o) => (
-          <div key={o.id} className="border border-gray-200 rounded-xl p-5 bg-gray-50 shadow-sm">
-            <div className="flex justify-between items-start flex-wrap gap-4 border-b pb-4 mb-4">
-              <div>
-                <div className="font-bold text-xl text-gray-900">{o.name}</div>
-                <div className="text-sm text-gray-500 mt-1">{o.location} · {o.phone}</div>
-              </div>
-              <div className="text-right">
-                <span className="text-xs text-gray-500 mr-2 font-semibold">Latest Status:</span>
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold capitalize ${latestDriverStatus.includes('reached') ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-700'}`}>
-                  {latestDriverStatus.replace("-", " ")}
-                </span>
-              </div>
-            </div>
-            
-            <div className="pt-2">
-              <div className="font-semibold text-lg mb-3 text-gray-700">Waybills Uploaded</div>
-              <WaybillWidget
-                items={o.waybills}
-                onUpload={(w) =>
-                  setOwners((all) => all.map((x) => (x.id === o.id ? { ...x, waybills: [w, ...x.waybills] } : x)))
-                }
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  
-  
-  function ManageTracks({ tracks, onToggle }) {
-    return (
-      <Section title="Manage Tracks Availability">
-        <div className="overflow-x-auto border border-gray-200 rounded-lg">
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 bg-gray-50">
-                <th className="text-left p-3 font-semibold text-gray-700">Plate</th>
-                <th className="text-left p-3 font-semibold text-gray-700">Model</th>
-                <th className="text-left p-3 font-semibold text-gray-700">Available</th>
-                <th className="text-left p-3 font-semibold text-gray-700">Action</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody>
-              {tracks.map((t) => (
-                <tr key={t.id} className="border-b border-gray-100 hover:bg-gray-100 transition duration-100">
-                  <td className="p-3 font-medium text-gray-900">{t.plate}</td>
-                  <td className="p-3 text-gray-600">{t.model ?? "—"}</td>
-                  <td className="p-3">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${t.isAvailable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {t.isAvailable ? "YES" : "NO"}
-                    </span>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {drivers.map(driver => (
+                <tr key={driver.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0 h-10 w-10">
+                        <img className="h-10 w-10 rounded-full object-cover" src={driver.photoUrl} alt={driver.name} />
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">{driver.name}</div>
+                        <div className="text-sm text-gray-500">{driver.address}</div>
+                      </div>
+                    </div>
                   </td>
-                  <td className="p-3">
-                    <button
-                      onClick={() => onToggle(t.id)}
-                      className={`px-3 py-1 text-xs font-medium rounded-lg transition duration-150 shadow-sm ${t.isAvailable ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-green-500 text-white hover:bg-green-600'}`}
-                    >
-                      {t.isAvailable ? "Set Unavailable" : "Set Available"}
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{driver.truckNumber}</div>
+                    <div className="text-sm text-gray-500">{driver.co_name}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Badge variant={getStatusColor(driver.status)}>{driver.status.replace('-', ' ')}</Badge>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {driver.phone}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                    <Select
+                      value={driver.status}
+                      onChange={(e) => onUpdateStatus(driver.id, e.target.value)}
+                      options={statusOptions}
+                    />
+                    <Button variant="outline" size="sm">
+                      <Edit className="w-4 h-4" />
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -1090,5 +440,629 @@ function DriverForm({ onCreate }) {
           </table>
         </div>
       </Section>
-    );
-  }
+    </div>
+  );
+};
+
+// --- CLIENT MANAGEMENT COMPONENT -----------------------------------------
+
+const ClientManagement = ({ owners, onSaveOwner, onDeleteOwner }) => {
+  const [editingOwner, setEditingOwner] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    contactPerson: "",
+    email: "",
+    phone: "",
+    location: ""
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (editingOwner) {
+      onSaveOwner({ ...editingOwner, ...formData });
+    } else {
+      onSaveOwner(formData);
+    }
+    resetForm();
+  };
+
+  const resetForm = () => {
+    setEditingOwner(null);
+    setIsFormOpen(false);
+    setFormData({
+      name: "",
+      contactPerson: "",
+      email: "",
+      phone: "",
+      location: ""
+    });
+  };
+
+  const handleEdit = (owner) => {
+    setEditingOwner(owner);
+    setFormData({
+      name: owner.name,
+      contactPerson: owner.contactPerson || "",
+      email: owner.email || "",
+      phone: owner.phone,
+      location: owner.location
+    });
+    setIsFormOpen(true);
+  };
+
+  return (
+    <div className="space-y-6">
+      <Header 
+        title="Client Management" 
+        actions={
+          <Button onClick={() => setIsFormOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add New Client
+          </Button>
+        } 
+      />
+
+      {/* Client Form Modal */}
+      {isFormOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">
+              {editingOwner ? 'Edit Client' : 'Add New Client'}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                label="Company Name"
+                value={formData.name}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+              <Input
+                label="Contact Person"
+                value={formData.contactPerson}
+                onChange={e => setFormData({ ...formData, contactPerson: e.target.value })}
+                required
+              />
+              <Input
+                label="Email"
+                type="email"
+                value={formData.email}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                required
+              />
+              <Input
+                label="Phone"
+                value={formData.phone}
+                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                required
+              />
+              <Input
+                label="Location"
+                value={formData.location}
+                onChange={e => setFormData({ ...formData, location: e.target.value })}
+                required
+              />
+              <div className="flex space-x-3 pt-4">
+                <Button type="button" variant="secondary" onClick={resetForm} className="flex-1">
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1">
+                  {editingOwner ? 'Update' : 'Create'} Client
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </div>
+      )}
+
+      {/* Clients Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {owners.map(owner => (
+          <Card key={owner.id} className="hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="font-semibold text-gray-900">{owner.name}</h3>
+                <p className="text-sm text-gray-600">{owner.contactPerson}</p>
+              </div>
+              <Badge variant="primary">{owner.waybills.length} waybills</Badge>
+            </div>
+            
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center text-gray-600">
+                <Mail className="w-4 h-4 mr-2" />
+                {owner.email}
+              </div>
+              <div className="flex items-center text-gray-600">
+                <Phone className="w-4 h-4 mr-2" />
+                {owner.phone}
+              </div>
+              <div className="flex items-center text-gray-600">
+                <MapPin className="w-4 h-4 mr-2" />
+                {owner.location}
+              </div>
+            </div>
+            
+            <div className="flex space-x-2 mt-4 pt-4 border-t border-gray-100">
+              <Button variant="outline" size="sm" onClick={() => handleEdit(owner)} className="flex-1">
+                <Edit className="w-4 h-4 mr-1" />
+                Edit
+              </Button>
+              <Button 
+                variant="error" 
+                size="sm"
+                onClick={() => {
+                  if (window.confirm(`Delete ${owner.name}?`)) {
+                    onDeleteOwner(owner.id);
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// --- FLEET TRACKING COMPONENT -------------------------------------------
+
+const FleetTracking = ({ tracks, onToggleAvailability }) => {
+  return (
+    <div className="space-y-6">
+      <Header title="Fleet Tracking" />
+      
+      <Section>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tracks.map(track => (
+            <Card key={track.id} className="relative">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="font-semibold text-gray-900 text-lg">{track.plate}</h3>
+                  <p className="text-gray-600">{track.model}</p>
+                </div>
+                <Badge variant={track.isAvailable ? "success" : "error"}>
+                  {track.isAvailable ? "Available" : "Unavailable"}
+                </Badge>
+              </div>
+              
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Driver:</span>
+                  <span className="font-medium">
+                    {track.assignedDriverId ? "Assigned" : "Unassigned"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Owner:</span>
+                  <span className="font-medium">{track.carOwnerId ? "Registered" : "Unknown"}</span>
+                </div>
+              </div>
+              
+              <Button 
+                variant={track.isAvailable ? "error" : "success"}
+                onClick={() => onToggleAvailability(track.id)}
+                className="w-full"
+              >
+                {track.isAvailable ? "Mark Unavailable" : "Mark Available"}
+              </Button>
+            </Card>
+          ))}
+        </div>
+      </Section>
+    </div>
+  );
+};
+
+// --- MESSAGES COMPONENT -------------------------------------------------
+
+const Messages = ({ messages, onSendMessage, drivers, owners }) => {
+  const [selectedRecipient, setSelectedRecipient] = useState(null);
+  const [newMessage, setNewMessage] = useState("");
+
+  const allRecipients = [
+    ...drivers.map(d => ({ ...d, type: 'driver' })),
+    ...owners.map(o => ({ ...o, type: 'owner' }))
+  ];
+
+  const filteredMessages = messages.filter(msg => 
+    selectedRecipient && 
+    ((msg.from === 'admin' && msg.toId === selectedRecipient.id) || 
+     (msg.from !== 'admin' && msg.toId === 'u1' && msg.from === selectedRecipient.type))
+  );
+
+  const handleSend = () => {
+    if (!newMessage.trim() || !selectedRecipient) return;
+    
+    onSendMessage({
+      id: generateId(),
+      from: 'admin',
+      toId: selectedRecipient.id,
+      text: newMessage.trim(),
+      at: now()
+    });
+    
+    setNewMessage("");
+  };
+
+  return (
+    <div className="space-y-6">
+      <Header title="Messages" />
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recipients List */}
+        <Section className="lg:col-span-1">
+          <h3 className="font-semibold text-gray-900 mb-4">Contacts</h3>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {allRecipients.map(recipient => (
+              <button
+                key={recipient.id}
+                onClick={() => setSelectedRecipient(recipient)}
+                className={`w-full text-left p-3 rounded-lg transition-colors ${
+                  selectedRecipient?.id === recipient.id 
+                    ? 'bg-blue-50 border border-blue-200' 
+                    : 'hover:bg-gray-50 border border-transparent'
+                }`}
+              >
+                <div className="font-medium text-gray-900">{recipient.name}</div>
+                <div className="text-sm text-gray-600 capitalize">{recipient.type}</div>
+              </button>
+            ))}
+          </div>
+        </Section>
+
+        {/* Chat Area */}
+        <Section className="lg:col-span-2">
+          {selectedRecipient ? (
+            <>
+              <div className="flex items-center space-x-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">{selectedRecipient.name}</div>
+                  <div className="text-sm text-gray-600 capitalize">{selectedRecipient.type}</div>
+                </div>
+              </div>
+
+              <div className="h-96 overflow-y-auto space-y-4 mb-4">
+                {filteredMessages.map(msg => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.from === 'admin' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-xs lg:max-w-md rounded-lg p-3 ${
+                        msg.from === 'admin' 
+                          ? 'bg-blue-600 text-white rounded-br-none' 
+                          : 'bg-gray-100 text-gray-900 rounded-bl-none'
+                      }`}
+                    >
+                      <p>{msg.text}</p>
+                      <p className={`text-xs mt-1 ${msg.from === 'admin' ? 'text-blue-200' : 'text-gray-500'}`}>
+                        {new Date(msg.at).toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex space-x-3">
+                <Input
+                  placeholder="Type your message..."
+                  value={newMessage}
+                  onChange={e => setNewMessage(e.target.value)}
+                  onKeyPress={e => e.key === 'Enter' && handleSend()}
+                  className="flex-1"
+                />
+                <Button onClick={handleSend} disabled={!newMessage.trim()}>
+                  Send
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <p>Select a contact to start messaging</p>
+            </div>
+          )}
+        </Section>
+      </div>
+    </div>
+  );
+};
+
+// --- DOCUMENTS COMPONENT ------------------------------------------------
+
+const Documents = () => {
+  const documentCategories = [
+    { name: "Waybills", count: 24, icon: FileText, color: "blue" },
+    { name: "Contracts", count: 8, icon: FileText, color: "green" },
+    { name: "Licenses", count: 12, icon: FileText, color: "purple" },
+    { name: "Insurance", count: 6, icon: FileText, color: "yellow" },
+  ];
+
+  const recentDocuments = [
+    { name: "Waybill_2024_003.pdf", date: "2024-01-15", size: "2.4 MB", type: "Waybill" },
+    { name: "Driver_Contract_Ali.pdf", date: "2024-01-14", size: "1.8 MB", type: "Contract" },
+    { name: "Insurance_Renewal.pdf", date: "2024-01-12", size: "3.2 MB", type: "Insurance" },
+    { name: "Vehicle_License_9921.pdf", date: "2024-01-10", size: "1.5 MB", type: "License" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <Header 
+        title="Documents" 
+        actions={
+          <Button>
+            <Upload className="w-4 h-4 mr-2" />
+            Upload Document
+          </Button>
+        } 
+      />
+
+      {/* Document Categories */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {documentCategories.map(category => {
+          const Icon = category.icon;
+          return (
+            <Card key={category.name} className="text-center">
+              <div className={`w-12 h-12 bg-${category.color}-100 rounded-lg flex items-center justify-center mx-auto mb-3`}>
+                <Icon className={`w-6 h-6 text-${category.color}-600`} />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">{category.count}</h3>
+              <p className="text-gray-600">{category.name}</p>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Recent Documents */}
+      <Section title="Recent Documents">
+        <div className="overflow-hidden rounded-lg border border-gray-200">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Document</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {recentDocuments.map((doc, index) => (
+                <tr key={index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <FileText className="w-5 h-5 text-gray-400 mr-3" />
+                      <div className="text-sm font-medium text-gray-900">{doc.name}</div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Badge variant="primary">{doc.type}</Badge>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {doc.date}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {doc.size}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <Button variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-1" />
+                      Download
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Section>
+    </div>
+  );
+};
+
+// --- SETTINGS COMPONENT -------------------------------------------------
+
+const SettingsPanel = () => {
+  return (
+    <div className="space-y-6">
+      <Header title="Settings" />
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Section className="lg:col-span-2">
+          <h3 className="font-semibold text-gray-900 mb-4">Account Settings</h3>
+          <div className="space-y-4">
+            <Input label="Full Name" defaultValue="Admin User" />
+            <Input label="Email" type="email" defaultValue="admin@heeylogistics.com" />
+            <Input label="Phone" defaultValue="+25263 123 4567" />
+            <Button>Save Changes</Button>
+          </div>
+        </Section>
+        
+        <Section>
+          <h3 className="font-semibold text-gray-900 mb-4">Preferences</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-700">Email Notifications</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" defaultChecked />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-700">SMS Notifications</span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+          </div>
+        </Section>
+      </div>
+    </div>
+  );
+};
+
+// --- MAIN APP COMPONENT -------------------------------------------------
+
+export default function App() {
+  const [currentTab, setCurrentTab] = useState("dashboard");
+  const [drivers, setDrivers] = useState(seedDrivers);
+  const [owners, setOwners] = useState(seedOwners);
+  const [tracks, setTracks] = useState(seedTracks);
+  const [messages, setMessages] = useState(seedMessages);
+  const [users, setUsers] = useState(seedUsers);
+
+  // Stats for dashboard
+  const stats = [
+    { 
+      label: "Total Vehicles", 
+      value: tracks.length, 
+      change: 12, 
+      icon: Car,
+      color: "bg-blue-500"
+    },
+    { 
+      label: "Active Drivers", 
+      value: drivers.filter(d => d.status !== 'idle').length, 
+      change: 5, 
+      icon: User,
+      color: "bg-green-500"
+    },
+    { 
+      label: "Clients", 
+      value: owners.length, 
+      change: 8, 
+      icon: Truck,
+      color: "bg-purple-500"
+    },
+    { 
+      label: "Available Vehicles", 
+      value: tracks.filter(t => t.isAvailable).length, 
+      change: -2, 
+      icon: CheckCircle,
+      color: "bg-yellow-500"
+    },
+  ];
+
+  const recentActivities = [
+    {
+      title: "New Driver Registered",
+      description: "Ahmed Ali joined the fleet",
+      time: "2 hours ago",
+      status: "Completed",
+      statusVariant: "success",
+      icon: User,
+      bgColor: "bg-green-100"
+    },
+    {
+      title: "Waybill Uploaded",
+      description: "Customs clearance document added",
+      time: "5 hours ago",
+      status: "Pending",
+      statusVariant: "warning",
+      icon: FileText,
+      bgColor: "bg-blue-100"
+    },
+    {
+      title: "Vehicle Maintenance",
+      description: "SL-TRK-4410 scheduled for service",
+      time: "1 day ago",
+      status: "Scheduled",
+      statusVariant: "primary",
+      icon: Car,
+      bgColor: "bg-yellow-100"
+    }
+  ];
+
+  // Handler functions
+  const handleUpdateDriverStatus = (driverId, newStatus) => {
+    setDrivers(drivers.map(d => 
+      d.id === driverId ? { ...d, status: newStatus } : d
+    ));
+  };
+
+  const handleSaveOwner = (ownerData) => {
+    if (ownerData.id) {
+      // Update existing owner
+      setOwners(owners.map(o => 
+        o.id === ownerData.id ? { ...o, ...ownerData } : o
+      ));
+    } else {
+      // Add new owner
+      const newOwner = {
+        id: generateId(),
+        waybills: [],
+        ...ownerData
+      };
+      setOwners([...owners, newOwner]);
+    }
+  };
+
+  const handleDeleteOwner = (ownerId) => {
+    setOwners(owners.filter(o => o.id !== ownerId));
+  };
+
+  const handleToggleAvailability = (trackId) => {
+    setTracks(tracks.map(t => 
+      t.id === trackId ? { ...t, isAvailable: !t.isAvailable } : t
+    ));
+  };
+
+  const handleSendMessage = (message) => {
+    setMessages([...messages, message]);
+  };
+
+  // Render current tab content
+  const renderContent = () => {
+    switch (currentTab) {
+      case "dashboard":
+        return <Dashboard stats={stats} recentActivities={recentActivities} />;
+      case "drivers":
+        return <DriverManagement 
+          drivers={drivers} 
+          onUpdateStatus={handleUpdateDriverStatus} 
+        />;
+      case "owners":
+        return <ClientManagement 
+          owners={owners} 
+          onSaveOwner={handleSaveOwner} 
+          onDeleteOwner={handleDeleteOwner} 
+        />;
+      case "fleet":
+        return <FleetTracking 
+          tracks={tracks} 
+          onToggleAvailability={handleToggleAvailability} 
+        />;
+      case "messages":
+        return <Messages 
+          messages={messages} 
+          onSendMessage={handleSendMessage}
+          drivers={drivers}
+          owners={owners}
+        />;
+      case "documents":
+        return <Documents />;
+      case "settings":
+        return <SettingsPanel />;
+      default:
+        return <Dashboard stats={stats} recentActivities={recentActivities} />;
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar currentTab={currentTab} setTab={setCurrentTab} />
+      
+      <div className="flex-1 overflow-auto">
+        <main className="p-6">
+          {renderContent()}
+        </main>
+      </div>
+    </div>
+  );
+}
