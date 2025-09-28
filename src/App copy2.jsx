@@ -43,7 +43,6 @@ const Header = ({ title, actions }) => (
         {actions}
     </div>
 );
-// FIX: Removed trailing semicolon after className = ""
 const Section = ({ title, children, className = "" }) => (
     <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
         <h3 className="font-semibold text-gray-900 mb-4 border-b pb-2">{title}</h3>
@@ -118,129 +117,14 @@ const RatingStars = ({ rating }) => (
     </div>
 );
 
-// --- UPDATED DASHBOARD COMPONENT ---
-const Dashboard = ({ stats, drivers }) => {
-    const statCards = [
-        { label: "Total Drivers", value: stats.totalDrivers, icon: User, variant: "primary" },
-        { label: "Total Clients", value: stats.totalClients, icon: Truck, variant: "secondary" },
-        { label: "Total Trucks", value: stats.totalTracks, icon: Car, variant: "default" },
-        { label: "Available Trucks", value: stats.availableTracks, icon: CheckCircle, variant: "success" },
-        { label: "Unavailable Trucks", value: stats.unavailableTracks, icon: AlertCircle, variant: "error" },
-        { label: "Total Requests", value: stats.totalRequests, icon: FileText, variant: "warning" },
-    ];
-    
-    const timeStatCards = [
-        { label: "Requests (Last Week)", value: stats.requestsLastWeek, icon: Clock, variant: "default" },
-        { label: "Requests (Last Month)", value: stats.requestsLastMonth, icon: Clock, variant: "default" },
-        { label: "Processed (Last Week)", value: stats.approvedRejectedLastWeek, icon: CheckCircle, variant: "success" },
-        { label: "Processed (Last Month)", value: stats.approvedRejectedLastMonth, icon: CheckCircle, variant: "success" },
-    ];
-    
-    return (
-        <div className="space-y-6">
-            <Header title="Dashboard Overview" />
-            
-            {/* Main Stats */}
-            <Section title="Key Logistics Metrics">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {statCards.map((card, index) => {
-                        const Icon = card.icon;
-                        return (
-                            <Card key={index} className="flex flex-col items-start p-4">
-                                <Icon className={`w-8 h-8 ${card.variant === 'primary' ? 'text-blue-500' : card.variant === 'secondary' ? 'text-purple-500' : card.variant === 'success' ? 'text-green-500' : card.variant === 'error' ? 'text-red-500' : card.variant === 'warning' ? 'text-yellow-500' : 'text-gray-500'} mb-2`} />
-                                <p className="text-xl font-bold text-gray-900">{card.value}</p>
-                                <p className="text-sm text-gray-500">{card.label}</p>
-                            </Card>
-                        );
-                    })}
-                </div>
-            </Section>
-
-            {/* Time-Based Request Stats */}
-            <Section title="Request & Order Velocity">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {timeStatCards.map((card, index) => {
-                        const Icon = card.icon;
-                        return (
-                            <Card key={index} className="flex items-center p-4">
-                                <Icon className={`w-6 h-6 ${card.variant === 'success' ? 'text-green-500' : 'text-gray-500'} mr-3`} />
-                                <div>
-                                    <p className="text-lg font-bold text-gray-900">{card.value}</p>
-                                    <p className="text-sm text-gray-500">{card.label}</p>
-                                </div>
-                            </Card>
-                        );
-                    })}
-                </div>
-            </Section>
-            
-            <TrackingStatus drivers={drivers} />
-        </div>
-    );
-};
-
-// --- UPDATED FLEET TRACKING COMPONENT ---
-const FleetTracking = ({ tracks, drivers }) => {
-    // Combine track data with driver status
-    const trackDetails = tracks.map(track => {
-        const driver = drivers.find(d => d.id === track.assignedDriverId);
-        const driverStatus = driver ? driver.status : 'unassigned';
-        const driverName = driver ? driver.name : 'N/A';
-        const statusColor = getStatusColor(driverStatus);
-        
-        return {
-            ...track,
-            driverName,
-            driverStatus,
-            statusColor
-        };
-    });
-
-    return (
-        <div className="space-y-6">
-            <Header title="Fleet Tracking & Availability" />
-            
-            <Section title="Track List">
-                <div className="overflow-hidden rounded-lg border border-gray-200">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Plate</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Model</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Availability</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Driver</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {trackDetails.map(track => (
-                                <tr key={track.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{track.plate}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{track.model}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <Badge variant={track.isAvailable ? 'success' : 'error'}>{track.isAvailable ? 'Available' : 'Maintenance'}</Badge>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{track.driverName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <Badge variant={track.statusColor}>{track.driverStatus.toUpperCase().replace(/_/g, ' ')}</Badge>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </Section>
-            
-            <TrackingStatus drivers={drivers} />
-        </div>
-    );
-};
-
+// Placeholder for non-core components
+const Dashboard = () => <Section title="Dashboard Overview"><p className="text-gray-500">Dashboard content here...</p></Section>;
+const FleetTracking = () => <Section title="Fleet Tracking"><p className="text-gray-500">Fleet map and details here...</p></Section>;
 const Messages = () => <Section title="Messages"><p className="text-gray-500">Message inbox here...</p></Section>;
 const Documents = () => <Section title="Documents"><p className="text-gray-500">Document management here...</p></Section>;
 const UserManagement = () => <Section title="User Management"><p className="text-gray-500">User accounts here...</p></Section>;
 const Settings = () => <Section title="Settings"><p className="text-gray-500">Application settings here...</p></Section>;
-// REMOVED: const About = () => <Section title="About"><p className="text-gray-500">About the application...</p></Section>;
+const About = () => <Section title="About"><p className="text-gray-500">About the application...</p></Section>;
 // --- END BOILERPLATE/HELPER COMPONENTS ---
 
 // --- DATA STRUCTURES ----------------------------------------------------
@@ -364,8 +248,7 @@ const getStatusColor = (status) => {
     "in-transit": "primary",
     "custom-reached": "secondary",
     "unloading": "error",
-    "purchaser-reached": "success",
-    "unassigned": "default" // Added for Fleet Tracking
+    "purchaser-reached": "success"
   };
   return statusMap[status] || "default";
 };
@@ -496,7 +379,7 @@ const Sidebar = ({ currentTab, setTab }) => {
     { id: "documents", label: "Documents", icon: FileText },
     { id: "user-management", label: "User Management", icon: Shield },
     { id: "settings", label: "Settings", icon: SettingsIcon },
-    // REMOVED: { id: "about", label: "About", icon: Info },
+    { id: "about", label: "About", icon: Info },
   ];
   return (
     <div className="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white h-screen flex flex-col">
@@ -1031,55 +914,6 @@ const App = () => {
   // NEW: Requests state
   const [requests, setRequests] = useState(seedRequests);
 
-  // --- STATS CALCULATION FUNCTION (New Implementation) ---
-  const calculateStats = (drivers, tracks, requests, owners) => {
-    const now = Date.now();
-    const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
-    const oneMonthAgo = now - 30 * 24 * 60 * 60 * 1000;
-
-    const totalTracks = tracks.length;
-    const totalDrivers = drivers.length;
-    const totalClients = owners.length;
-
-    const availableTracks = tracks.filter(t => t.isAvailable).length;
-    const unavailableTracks = totalTracks - availableTracks;
-
-    const totalRequests = requests.length;
-
-    const filterRequestsByTime = (reqList, timeThreshold) => 
-        reqList.filter(req => new Date(req.createdAt).getTime() >= timeThreshold);
-
-    const requestsLastWeek = filterRequestsByTime(requests, oneWeekAgo);
-    const requestsLastMonth = filterRequestsByTime(requests, oneMonthAgo);
-    
-    // Statuses that count as "processed" (approved, rejected, or completed)
-    const PROCESSED_STATUSES = [REQUEST_STATUSES.ACCEPTED, REQUEST_STATUSES.REJECTED, REQUEST_STATUSES.COMPLETED];
-
-    const approvedRejectedLastWeek = requestsLastWeek.filter(req => 
-        PROCESSED_STATUSES.includes(req.status)
-    ).length;
-
-    const approvedRejectedLastMonth = requestsLastMonth.filter(req => 
-        PROCESSED_STATUSES.includes(req.status)
-    ).length;
-
-    return {
-        totalTracks,
-        totalDrivers,
-        totalClients,
-        availableTracks,
-        unavailableTracks,
-        totalRequests,
-        requestsLastWeek: requestsLastWeek.length,
-        requestsLastMonth: requestsLastMonth.length,
-        approvedRejectedLastWeek,
-        approvedRejectedLastMonth
-    };
-  };
-
-  // --- MEMOIZED STATS (Updated) ---
-  const stats = useMemo(() => calculateStats(drivers, tracks, requests, owners), [drivers, tracks, requests, owners]);
-
 
   // --- NEW WORKFLOW HANDLERS ---
 
@@ -1218,19 +1052,18 @@ const App = () => {
   const handleUnassignDriver = () => alert("Unassign driver not implemented.");
   const handleRateDriver = () => alert("Rate driver not implemented.");
   const handleMarkArrived = () => alert("Mark arrived not implemented.");
+  const handleUpdateAvailability = () => alert("Update availability not implemented.");
   const handleAssignDriverToTrack = () => alert("Assign driver to track not implemented.");
   const handleSendMessage = () => alert("Send message not implemented.");
   const handleSaveUser = () => alert("Save user not implemented.");
   const handleDeleteUser = () => alert("Delete user not implemented.");
-  // FIX: Removed duplicate declaration of handleUpdateAvailability
-  const handleUpdateAvailability = () => alert("Update availability not implemented."); 
-  // Removed unused useMemo recentActivities
+  const stats = useMemo(() => ({ /* ... */ }), []);
+  const recentActivities = useMemo(() => ([ /* ... */ ]), []);
   
   const renderContent = () => {
     switch (currentTab) {
       case "dashboard":
-        // Passing stats for the new cards and drivers for the embedded TrackingStatus
-        return <Dashboard stats={stats} drivers={drivers} />;
+        return <Dashboard stats={stats} recentActivities={recentActivities} drivers={drivers} owners={owners} tracks={tracks} />;
       
       case "requests":
         return <RequestManagement 
@@ -1263,13 +1096,7 @@ const App = () => {
         />;
       
       case "fleet":
-        // Passing tracks and drivers for the new FleetTracking list
-        return <FleetTracking 
-            tracks={tracks} 
-            drivers={drivers} 
-            onUpdateAvailability={handleUpdateAvailability} 
-            onAssignDriver={handleAssignDriverToTrack} 
-        />;
+        return <FleetTracking tracks={tracks} drivers={drivers} onUpdateAvailability={handleUpdateAvailability} onAssignDriver={handleAssignDriverToTrack} />;
       case "messages":
         return <Messages messages={messages} onSendMessage={handleSendMessage} drivers={drivers} owners={owners} />;
       case "documents":
@@ -1278,9 +1105,10 @@ const App = () => {
         return <UserManagement users={users} onSaveUser={handleSaveUser} onDeleteUser={handleDeleteUser} />;
       case "settings":
         return <Settings />;
-      // REMOVED: case "about": return <About />;
+      case "about":
+        return <About />;
       default:
-        return <Dashboard stats={stats} drivers={drivers} />;
+        return <Dashboard stats={stats} recentActivities={recentActivities} drivers={drivers} owners={owners} tracks={tracks} />;
     }
   };
 
