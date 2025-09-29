@@ -41,219 +41,316 @@ import {
   Camera
 } from "lucide-react";
 
-// --- BOILERPLATE/HELPER COMPONENTS (Added/Completed for error prevention) ---
+// --- BOILERPLATE/HELPER COMPONENTS ---
 
-// Placeholder for missing components
 const Header = ({ title, actions }) => (
-    <div className="flex justify-between items-center mb-6 border-b pb-4">
-        <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-        {actions}
+  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-6 border-b border-gray-200">
+    <div>
+      <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
+      <p className="text-gray-600 mt-2">Manage your logistics operations efficiently</p>
     </div>
+    {actions && <div className="flex-shrink-0">{actions}</div>}
+  </div>
 );
 
-const Section = ({ title, children, className = "" }) => (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
-        <h3 className="font-semibold text-gray-900 mb-4 border-b pb-2">{title}</h3>
-        {children}
+const Section = ({ title, children, className = "", description }) => (
+  <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-8 ${className}`}>
+    <div className="mb-6">
+      <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
+      {description && <p className="text-gray-600 mt-2 text-sm">{description}</p>}
     </div>
+    {children}
+  </div>
 );
-const Card = ({ children, className = "", onClick }) => (
-    <div onClick={onClick} className={`bg-white rounded-lg shadow-sm p-4 border border-gray-100 ${className}`}>
-        {children}
-    </div>
+
+const Card = ({ children, className = "", onClick, hover = false }) => (
+  <div 
+    onClick={onClick} 
+    className={`bg-white rounded-xl shadow-sm p-6 border border-gray-100 transition-all duration-200 ${
+      hover ? "hover:shadow-md hover:border-blue-100 cursor-pointer" : ""
+    } ${className}`}
+  >
+    {children}
+  </div>
 );
+
 const Badge = ({ children, variant = "default", className = "" }) => {
-    const variantMap = {
-        default: "bg-gray-100 text-gray-800",
-        primary: "bg-blue-100 text-blue-800",
-        success: "bg-green-100 text-green-800",
-        warning: "bg-yellow-100 text-yellow-800",
-        error: "bg-red-100 text-red-800",
-        secondary: "bg-purple-100 text-purple-800",
-    };
-    return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variantMap[variant]} ${className}`}>
-            {children}
-        </span>
-    );
+  const variantMap = {
+    default: "bg-gray-100 text-gray-800",
+    primary: "bg-blue-100 text-blue-800",
+    success: "bg-green-100 text-green-800",
+    warning: "bg-yellow-100 text-yellow-800",
+    error: "bg-red-100 text-red-800",
+    secondary: "bg-purple-100 text-purple-800",
+  };
+  return (
+    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${variantMap[variant]} ${className}`}>
+      {children}
+    </span>
+  );
 };
+
 const Button = ({ children, variant = "primary", size = "md", ...props }) => {
-    const base = "inline-flex items-center justify-center border font-medium rounded-lg shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
-    const sizeMap = { sm: "px-2.5 py-1.5 text-xs", md: "px-4 py-2 text-sm", lg: "px-6 py-3 text-base" };
-    const variantMap = {
-        primary: "border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
-        secondary: "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-indigo-500",
-        success: "border-transparent bg-green-600 text-white hover:bg-green-700 focus:ring-green-500",
-        error: "border-transparent bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
-        outline: "border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 focus:ring-indigo-500",
-    };
-    const disabled = props.disabled ? "opacity-50 cursor-not-allowed" : "";
-    return (
-        <button className={`${base} ${sizeMap[size]} ${variantMap[variant]} ${disabled}`} {...props}>
-            {children}
-        </button>
-    );
+  const base = "inline-flex items-center justify-center border font-medium rounded-xl shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2";
+  const sizeMap = { 
+    sm: "px-3 py-2 text-sm", 
+    md: "px-5 py-2.5 text-sm", 
+    lg: "px-6 py-3 text-base" 
+  };
+  const variantMap = {
+    primary: "border-transparent bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 focus:ring-blue-500",
+    secondary: "border-gray-300 bg-white text-gray-700 hover:bg-gray-50 focus:ring-blue-500",
+    success: "border-transparent bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 focus:ring-green-500",
+    error: "border-transparent bg-gradient-to-r from-red-600 to-red-700 text-white hover:from-red-700 hover:to-red-800 focus:ring-red-500",
+    outline: "border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 focus:ring-blue-500",
+  };
+  const disabled = props.disabled ? "opacity-50 cursor-not-allowed" : "";
+  return (
+    <button className={`${base} ${sizeMap[size]} ${variantMap[variant]} ${disabled}`} {...props}>
+      {children}
+    </button>
+  );
 };
+
 const Input = ({ label, type = "text", ...props }) => (
-    <div className="space-y-1">
-        <label className="block text-sm font-medium text-gray-700">{label}</label>
-        <input type={type} className="block w-full border border-gray-300 rounded-lg shadow-sm p-2 text-sm focus:border-blue-500 focus:ring-blue-500" {...props} />
-    </div>
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-gray-700">{label}</label>
+    <input 
+      type={type} 
+      className="block w-full border border-gray-300 rounded-xl shadow-sm p-3 text-sm focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200" 
+      {...props} 
+    />
+  </div>
 );
+
 const Select = ({ label, options, ...props }) => (
-    <div className="space-y-1">
-        <label className="block text-sm font-medium text-gray-700">{label}</label>
-        <select className="block w-full border border-gray-300 rounded-lg shadow-sm p-2 text-sm focus:border-blue-500 focus:ring-blue-500" {...props}>
-            {options.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-        </select>
-    </div>
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-gray-700">{label}</label>
+    <select className="block w-full border border-gray-300 rounded-xl shadow-sm p-3 text-sm focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200" {...props}>
+      {options.map(opt => (
+        <option key={opt.value} value={opt.value}>{opt.label}</option>
+      ))}
+    </select>
+  </div>
 );
+
 const FileUpload = ({ label, onFileChange, ...props }) => (
-    <div className="space-y-1">
-        <label className="block text-sm font-medium text-gray-700">{label || "Upload File"}</label>
-        <input type="file" onChange={onFileChange} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" {...props} />
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-gray-700">{label || "Upload File"}</label>
+    <div className="flex items-center justify-center w-full">
+      <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-xl cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+          <Upload className="w-8 h-8 mb-3 text-gray-500" />
+          <p className="mb-2 text-sm text-gray-500"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+          <p className="text-xs text-gray-500">PDF, DOC, JPG, PNG</p>
+        </div>
+        <input type="file" onChange={onFileChange} className="hidden" {...props} />
+      </label>
     </div>
+  </div>
 );
+
 const RatingStars = ({ rating }) => (
-    <div className="flex items-center text-yellow-400">
-        {[...Array(5)].map((_, i) => (
-            <Star key={i} className={`w-4 h-4 ${i < Math.floor(rating) ? 'fill-current' : ''}`} />
-        ))}
-        <span className="text-xs text-gray-600 ml-1">({rating})</span>
+  <div className="flex items-center">
+    <div className="flex text-yellow-400">
+      {[...Array(5)].map((_, i) => (
+        <Star 
+          key={i} 
+          className={`w-5 h-5 ${i < Math.floor(rating) ? 'fill-current' : ''}`} 
+        />
+      ))}
     </div>
+    <span className="ml-2 text-sm text-gray-600">({rating})</span>
+  </div>
 );
 
-// --- UPDATED DASHBOARD COMPONENT ---
+// --- DASHBOARD COMPONENT ---
 const Dashboard = ({ stats, drivers }) => {
-    const statCards = [
-        { label: "Total Drivers", value: stats.totalDrivers, icon: User, variant: "primary" },
-        { label: "Total Clients", value: stats.totalClients, icon: Truck, variant: "secondary" },
-        { label: "Total Trucks", value: stats.totalTracks, icon: Car, variant: "default" },
-        { label: "Available Trucks", value: stats.availableTracks, icon: CheckCircle, variant: "success" },
-        { label: "Unavailable Trucks", value: stats.unavailableTracks, icon: AlertCircle, variant: "error" },
-        { label: "Total Requests", value: stats.totalRequests, icon: FileText, variant: "warning" },
-    ];
-    
-    const timeStatCards = [
-        { label: "Requests (Last Week)", value: stats.requestsLastWeek, icon: Clock, variant: "default" },
-        { label: "Requests (Last Month)", value: stats.requestsLastMonth, icon: Clock, variant: "default" },
-        { label: "Processed (Last Week)", value: stats.approvedRejectedLastWeek, icon: CheckCircle, variant: "success" },
-        { label: "Processed (Last Month)", value: stats.approvedRejectedLastMonth, icon: CheckCircle, variant: "success" },
-    ];
-    
-    return (
-        <div className="space-y-6">
-            <Header title="Dashboard Overview" />
-            
-            {/* Main Stats */}
-            <Section title="Key Logistics Metrics">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                    {statCards.map((card, index) => {
-                        const Icon = card.icon;
-                        return (
-                            <Card key={index} className="flex flex-col items-start p-4">
-                                <Icon className={`w-8 h-8 ${card.variant === 'primary' ? 'text-blue-500' : card.variant === 'secondary' ? 'text-purple-500' : card.variant === 'success' ? 'text-green-500' : card.variant === 'error' ? 'text-red-500' : card.variant === 'warning' ? 'text-yellow-500' : 'text-gray-500'} mb-2`} />
-                                <p className="text-xl font-bold text-gray-900">{card.value}</p>
-                                <p className="text-sm text-gray-500">{card.label}</p>
-                            </Card>
-                        );
-                    })}
+  const statCards = [
+    { label: "Total Drivers", value: stats.totalDrivers, icon: User, variant: "primary", trend: "+12%" },
+    { label: "Total Clients", value: stats.totalClients, icon: Truck, variant: "secondary", trend: "+8%" },
+    { label: "Total Trucks", value: stats.totalTracks, icon: Car, variant: "default", trend: "+5%" },
+    { label: "Available Trucks", value: stats.availableTracks, icon: CheckCircle, variant: "success", trend: "+3%" },
+    { label: "Unavailable Trucks", value: stats.unavailableTracks, icon: AlertCircle, variant: "error", trend: "-2%" },
+    { label: "Total Requests", value: stats.totalRequests, icon: FileText, variant: "warning", trend: "+15%" },
+  ];
+  
+  const timeStatCards = [
+    { label: "Requests (Last Week)", value: stats.requestsLastWeek, icon: Clock, variant: "default" },
+    { label: "Requests (Last Month)", value: stats.requestsLastMonth, icon: Clock, variant: "default" },
+    { label: "Processed (Last Week)", value: stats.approvedRejectedLastWeek, icon: CheckCircle, variant: "success" },
+    { label: "Processed (Last Month)", value: stats.approvedRejectedLastMonth, icon: CheckCircle, variant: "success" },
+  ];
+  
+  return (
+    <div className="space-y-8">
+      <Header 
+        title="Dashboard Overview" 
+        description="Monitor your logistics operations and key performance indicators"
+      />
+      
+      {/* Main Stats */}
+      <Section 
+        title="Key Logistics Metrics" 
+        description="Overview of your fleet, drivers, and request volumes"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {statCards.map((card, index) => {
+            const Icon = card.icon;
+            return (
+              <Card key={index} className="relative overflow-hidden group hover:scale-105 transition-transform duration-200">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-600 mb-2">{card.label}</p>
+                    <p className="text-3xl font-bold text-gray-900 mb-2">{card.value}</p>
+                    <div className={`inline-flex items-center text-sm font-medium ${
+                      card.trend.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      <TrendingUp className={`w-4 h-4 mr-1 ${
+                        card.trend.startsWith('+') ? '' : 'rotate-180'
+                      }`} />
+                      {card.trend}
+                    </div>
+                  </div>
+                  <div className={`p-3 rounded-xl ${
+                    card.variant === 'primary' ? 'bg-blue-50' :
+                    card.variant === 'secondary' ? 'bg-purple-50' :
+                    card.variant === 'success' ? 'bg-green-50' :
+                    card.variant === 'error' ? 'bg-red-50' :
+                    card.variant === 'warning' ? 'bg-yellow-50' : 'bg-gray-50'
+                  }`}>
+                    <Icon className={`w-6 h-6 ${
+                      card.variant === 'primary' ? 'text-blue-600' :
+                      card.variant === 'secondary' ? 'text-purple-600' :
+                      card.variant === 'success' ? 'text-green-600' :
+                      card.variant === 'error' ? 'text-red-600' :
+                      card.variant === 'warning' ? 'text-yellow-600' : 'text-gray-600'
+                    }`} />
+                  </div>
                 </div>
-            </Section>
-
-            {/* Time-Based Request Stats */}
-            <Section title="Request & Order Velocity">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    {timeStatCards.map((card, index) => {
-                        const Icon = card.icon;
-                        return (
-                            <Card key={index} className="flex items-center p-4">
-                                <Icon className={`w-6 h-6 ${card.variant === 'success' ? 'text-green-500' : 'text-gray-500'} mr-3`} />
-                                <div>
-                                    <p className="text-lg font-bold text-gray-900">{card.value}</p>
-                                    <p className="text-sm text-gray-500">{card.label}</p>
-                                </div>
-                            </Card>
-                        );
-                    })}
-                </div>
-            </Section>
-            
-            <TrackingStatus drivers={drivers} />
+              </Card>
+            );
+          })}
         </div>
-    );
+      </Section>
+
+      {/* Time-Based Request Stats */}
+      <Section 
+        title="Request & Order Velocity" 
+        description="Track request processing and completion rates over time"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {timeStatCards.map((card, index) => {
+            const Icon = card.icon;
+            return (
+              <Card key={index} className="text-center group hover:shadow-md transition-shadow duration-200">
+                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${
+                  card.variant === 'success' ? 'bg-green-50' : 'bg-gray-50'
+                } mb-4`}>
+                  <Icon className={`w-6 h-6 ${
+                    card.variant === 'success' ? 'text-green-600' : 'text-gray-600'
+                  }`} />
+                </div>
+                <p className="text-2xl font-bold text-gray-900 mb-1">{card.value}</p>
+                <p className="text-sm text-gray-600">{card.label}</p>
+              </Card>
+            );
+          })}
+        </div>
+      </Section>
+      
+      <TrackingStatus drivers={drivers} />
+    </div>
+  );
 };
 
-// --- UPDATED FLEET TRACKING COMPONENT ---
+// --- FLEET TRACKING COMPONENT ---
 const FleetTracking = ({ tracks, drivers }) => {
-    // Combine track data with driver status
-    const trackDetails = tracks.map(track => {
-        const driver = drivers.find(d => d.id === track.assignedDriverId);
-        const driverStatus = driver ? driver.status : 'unassigned';
-        const driverName = driver ? driver.name : 'N/A';
-        const statusColor = getStatusColor(driverStatus);
-        
-        return {
-            ...track,
-            driverName,
-            driverStatus,
-            statusColor
-        };
-    });
+  const trackDetails = tracks.map(track => {
+    const driver = drivers.find(d => d.id === track.assignedDriverId);
+    const driverStatus = driver ? driver.status : 'unassigned';
+    const driverName = driver ? driver.name : 'N/A';
+    const statusColor = getStatusColor(driverStatus);
+    
+    return {
+      ...track,
+      driverName,
+      driverStatus,
+      statusColor
+    };
+  });
 
-    return (
-        <div className="space-y-6">
-            <Header title="Fleet Tracking & Availability" />
-            
-            <Section title="Track List">
-                <div className="overflow-hidden rounded-lg border border-gray-200">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Plate</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Model</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Availability</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Assigned Driver</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Status</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                            {trackDetails.map(track => (
-                                <tr key={track.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{track.plate}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{track.model}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <Badge variant={track.isAvailable ? 'success' : 'error'}>{track.isAvailable ? 'Available' : 'Maintenance'}</Badge>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{track.driverName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <Badge variant={track.statusColor}>{track.driverStatus.toUpperCase().replace(/_/g, ' ')}</Badge>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </Section>
-            
-            <TrackingStatus drivers={drivers} />
+  return (
+    <div className="space-y-8">
+      <Header 
+        title="Fleet Tracking & Availability" 
+        description="Monitor truck status, assignments, and driver availability in real-time"
+      />
+      
+      <Section 
+        title="Truck Fleet Overview" 
+        description="Complete list of all trucks with their current status and assignments"
+      >
+        <div className="overflow-hidden rounded-xl border border-gray-200">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                <tr>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Truck Plate</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Model</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Availability</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Assigned Driver</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Current Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 bg-white">
+                {trackDetails.map(track => (
+                  <tr key={track.id} className="hover:bg-gray-50 transition-colors duration-150">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <Car className="w-5 h-5 text-blue-600 mr-3" />
+                        <span className="text-sm font-medium text-gray-900">{track.plate}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{track.model}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge variant={track.isAvailable ? 'success' : 'error'} className="text-xs">
+                        {track.isAvailable ? 'Available' : 'Maintenance'}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <User className="w-4 h-4 text-gray-400 mr-2" />
+                        <span className="text-sm text-gray-900">{track.driverName}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Badge variant={track.statusColor} className="text-xs">
+                        {track.driverStatus.toUpperCase().replace(/_/g, ' ')}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-    );
+      </Section>
+      
+      <TrackingStatus drivers={drivers} />
+    </div>
+  );
 };
 
-// --- UPDATED MESSAGES COMPONENT WITH DIRECT CLIENT-DRIVER MESSAGING ---
+// --- MESSAGES COMPONENT ---
 const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) => {
   const [activeThread, setActiveThread] = useState(null);
   const [newMessage, setNewMessage] = useState('');
   const [attachments, setAttachments] = useState([]);
 
-  // Get active threads based on requests with assigned drivers
   const activeThreads = useMemo(() => {
     const threads = [];
     
-    // Create threads for client-driver pairs from active requests
     drivers.forEach(driver => {
       if (driver.assignedClientId) {
         const client = owners.find(owner => owner.id === driver.assignedClientId);
@@ -281,7 +378,6 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
     return threads;
   }, [drivers, owners, messages]);
 
-  // Filter messages for active thread
   const threadMessages = useMemo(() => {
     if (!activeThread) return [];
     
@@ -333,24 +429,33 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
   };
 
   return (
-    <div className="space-y-6">
-      <Header title="Direct Client-Driver Messaging" />
+    <div className="space-y-8">
+      <Header 
+        title="Direct Client-Driver Messaging" 
+        description="Coordinate shipments and communicate directly with drivers and clients"
+      />
       
-      <Section title="Communication Hub" className="p-0 overflow-hidden">
-        <div className="flex h-[600px] border border-gray-200 rounded-lg">
+      <Section 
+        title="Communication Hub" 
+        className="p-0 overflow-hidden"
+        description="Real-time messaging between clients, drivers, and administrators"
+      >
+        <div className="flex flex-col lg:flex-row h-[600px] border border-gray-200 rounded-2xl overflow-hidden">
           {/* Threads Sidebar */}
-          <div className="w-1/3 border-r border-gray-200 bg-gray-50">
-            <div className="p-4 border-b border-gray-200">
-              <h3 className="font-semibold text-gray-900">Active Threads ({activeThreads.length})</h3>
-              <p className="text-sm text-gray-600">Based on requests with assigned drivers</p>
+          <div className="lg:w-1/3 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-50">
+            <div className="p-6 border-b border-gray-200 bg-white">
+              <h3 className="font-semibold text-gray-900 text-lg">Active Threads</h3>
+              <p className="text-sm text-gray-600 mt-1">Based on requests with assigned drivers</p>
             </div>
             
             <div className="overflow-y-auto h-full">
               {activeThreads.map(thread => (
                 <div
                   key={thread.id}
-                  className={`p-4 border-b border-gray-200 cursor-pointer hover:bg-white transition-colors ${
-                    activeThread?.id === thread.id ? 'bg-white border-r-2 border-blue-500' : ''
+                  className={`p-4 border-b border-gray-200 cursor-pointer transition-all duration-200 ${
+                    activeThread?.id === thread.id 
+                      ? 'bg-blue-50 border-r-4 border-blue-500' 
+                      : 'hover:bg-white'
                   }`}
                   onClick={() => setActiveThread(thread)}
                 >
@@ -359,12 +464,12 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
                       <img
                         src={thread.driverPhoto}
                         alt={thread.driverName}
-                        className="w-10 h-10 rounded-full object-cover"
+                        className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-gray-900 text-sm">
+                        <h4 className="font-semibold text-gray-900 text-sm">
                           {thread.clientName} & {thread.driverName}
                         </h4>
                         {thread.lastMessage && (
@@ -373,11 +478,11 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-600 truncate">
+                      <p className="text-xs text-gray-600 truncate mt-1">
                         {thread.requestInfo}
                       </p>
                       {thread.lastMessage && (
-                        <p className="text-sm text-gray-700 truncate mt-1">
+                        <p className="text-sm text-gray-700 truncate mt-2">
                           {thread.lastMessage.content}
                         </p>
                       )}
@@ -388,9 +493,9 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
               
               {activeThreads.length === 0 && (
                 <div className="p-8 text-center text-gray-500">
-                  <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p>No active threads</p>
-                  <p className="text-sm">Threads appear when drivers are assigned to clients</p>
+                  <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                  <p className="font-medium">No active threads</p>
+                  <p className="text-sm mt-1">Threads appear when drivers are assigned to clients</p>
                 </div>
               )}
             </div>
@@ -401,19 +506,18 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
             {activeThread ? (
               <>
                 {/* Chat Header */}
-                <div className="p-4 border-b border-gray-200 bg-white">
-                  <div className="flex items-center space-x-3">
+                <div className="p-6 border-b border-gray-200 bg-white">
+                  <div className="flex items-center space-x-4">
                     <div className="flex items-center space-x-2">
                       <img
                         src={activeThread.driverPhoto}
                         alt={activeThread.driverName}
-                        className="w-8 h-8 rounded-full object-cover"
+                        className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
                       />
-                      <img
-                        src="/api/placeholder/32/32"
-                        alt={activeThread.clientName}
-                        className="w-8 h-8 rounded-full object-cover bg-gray-300"
-                      />
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white font-medium">
+                        {activeThread.clientName.charAt(0)}
+                      </div>
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">
@@ -425,12 +529,12 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-gray-100">
                   {threadMessages.length === 0 ? (
-                    <div className="text-center text-gray-500 py-8">
-                      <MessageCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                      <p>No messages yet</p>
-                      <p className="text-sm">Start the conversation</p>
+                    <div className="text-center text-gray-500 py-12">
+                      <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                      <p className="font-medium">No messages yet</p>
+                      <p className="text-sm mt-1">Start the conversation</p>
                     </div>
                   ) : (
                     threadMessages.map(message => (
@@ -445,24 +549,30 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
                         }`}
                       >
                         <div
-                          className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                          className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl ${
                             message.senderType === 'admin'
                               ? 'bg-yellow-100 border border-yellow-200 text-yellow-800'
                               : message.senderId === activeThread.driverId
-                                ? 'bg-white border border-gray-200 text-gray-900'
-                                : 'bg-blue-500 text-white'
+                                ? 'bg-white border border-gray-200 text-gray-900 shadow-sm'
+                                : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white'
                           }`}
                         >
                           {message.senderType === 'admin' && (
-                            <div className="text-xs font-semibold mb-1">System Admin</div>
+                            <div className="text-xs font-semibold mb-1 flex items-center">
+                              <Shield className="w-3 h-3 mr-1" />
+                              System Admin
+                            </div>
                           )}
                           <p className="text-sm">{message.content}</p>
                           
-                          {/* Attachments */}
                           {message.attachments && message.attachments.length > 0 && (
                             <div className="mt-2 space-y-1">
                               {message.attachments.map(att => (
-                                <div key={att.id} className="flex items-center space-x-2 text-xs bg-black bg-opacity-10 px-2 py-1 rounded">
+                                <div key={att.id} className={`flex items-center space-x-2 text-xs px-2 py-1 rounded-lg ${
+                                  message.senderId === activeThread.driverId 
+                                    ? 'bg-gray-100 text-gray-700' 
+                                    : 'bg-blue-500 bg-opacity-20 text-blue-700'
+                                }`}>
                                   <Paperclip className="w-3 h-3" />
                                   <span className="truncate">{att.name}</span>
                                 </div>
@@ -470,7 +580,7 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
                             </div>
                           )}
                           
-                          <div className={`text-xs mt-1 ${
+                          <div className={`text-xs mt-2 ${
                             message.senderType === 'admin' 
                               ? 'text-yellow-600' 
                               : message.senderId === activeThread.driverId
@@ -486,22 +596,23 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
                 </div>
 
                 {/* Message Input */}
-                <div className="border-t border-gray-200 bg-white p-4">
-                  {/* Attachments Preview */}
+                <div className="border-t border-gray-200 bg-white p-6">
                   {attachments.length > 0 && (
-                    <div className="mb-3 space-y-2">
+                    <div className="mb-4 space-y-2">
                       {attachments.map(attachment => (
-                        <div key={attachment.id} className="flex items-center justify-between bg-gray-100 px-3 py-2 rounded-lg">
-                          <div className="flex items-center space-x-2">
+                        <div key={attachment.id} className="flex items-center justify-between bg-gray-100 px-4 py-3 rounded-xl">
+                          <div className="flex items-center space-x-3">
                             <Paperclip className="w-4 h-4 text-gray-600" />
-                            <span className="text-sm text-gray-700">{attachment.name}</span>
-                            <span className="text-xs text-gray-500">
-                              ({(attachment.size / 1024).toFixed(1)} KB)
-                            </span>
+                            <div>
+                              <span className="text-sm font-medium text-gray-700">{attachment.name}</span>
+                              <span className="text-xs text-gray-500 ml-2">
+                                ({(attachment.size / 1024).toFixed(1)} KB)
+                              </span>
+                            </div>
                           </div>
                           <button
                             onClick={() => removeAttachment(attachment.id)}
-                            className="text-gray-400 hover:text-red-500"
+                            className="text-gray-400 hover:text-red-500 transition-colors duration-200"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -510,19 +621,19 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
                     </div>
                   )}
                   
-                  <form onSubmit={handleSendMessage} className="flex space-x-2">
+                  <form onSubmit={handleSendMessage} className="flex space-x-3">
                     <div className="flex-1">
                       <input
                         type="text"
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Type a coordination message to the thread (Admin only)..."
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                        className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
                       />
                     </div>
                     
-                    <div className="flex space-x-1">
-                      <label className="cursor-pointer p-2 text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100">
+                    <div className="flex space-x-2">
+                      <label className="cursor-pointer p-3 text-gray-600 hover:text-gray-800 rounded-xl hover:bg-gray-100 transition-colors duration-200">
                         <Paperclip className="w-5 h-5" />
                         <input
                           type="file"
@@ -544,10 +655,11 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
                 </div>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-gray-500">
+              <div className="flex-1 flex items-center justify-center text-gray-500 bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="text-center">
-                  <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-                  <p>Select a conversation to start messaging</p>
+                  <MessageCircle className="w-20 h-20 mx-auto mb-6 text-gray-300" />
+                  <p className="font-medium text-lg mb-2">Select a conversation</p>
+                  <p className="text-gray-600">Choose a thread from the sidebar to start messaging</p>
                 </div>
               </div>
             )}
@@ -558,84 +670,102 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
   );
 };
 
-// --- UPDATED DOCUMENTS COMPONENT ---
+// --- DOCUMENTS COMPONENT ---
 const Documents = ({ requests }) => {
-  // Filter requests that have waybills
   const waybillRequests = requests.filter(req => 
     req.driverWaybillUrl || req.clientWaybillUrl
   );
 
   return (
-    <div className="space-y-6">
-      <Header title="Document Management" />
+    <div className="space-y-8">
+      <Header 
+        title="Document Management" 
+        description="Access and manage all waybill documents and shipment paperwork"
+      />
       
-      <Section title="Waybill Documents">
+      <Section 
+        title="Waybill Documents" 
+        description="Digital waybills uploaded by drivers and clients for each shipment"
+      >
         {waybillRequests.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>No waybill documents available</p>
-            <p className="text-sm">Waybills will appear here once uploaded by drivers and clients</p>
+          <div className="text-center py-12 text-gray-500">
+            <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <p className="font-medium text-lg mb-2">No waybill documents available</p>
+            <p className="text-gray-600">Waybills will appear here once uploaded by drivers and clients</p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-gray-200">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver Waybill</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client Waybill</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {waybillRequests.map(request => (
-                  <tr key={request.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {request.id.slice(0, 8)}...
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {request.cargo}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {request.driverName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {request.driverWaybillUrl ? (
-                        <a 
-                          href={request.driverWaybillUrl} 
-                          target="_blank" 
-                          className="text-blue-600 hover:text-blue-800 flex items-center space-x-1"
-                        >
-                          <FileText className="w-4 h-4" />
-                          <span>View Waybill</span>
-                        </a>
-                      ) : (
-                        <span className="text-gray-400">Not uploaded</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {request.clientName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {request.clientWaybillUrl ? (
-                        <a 
-                          href={request.clientWaybillUrl} 
-                          target="_blank" 
-                          className="text-blue-600 hover:text-blue-800 flex items-center space-x-1"
-                        >
-                          <FileText className="w-4 h-4" />
-                          <span>View Waybill</span>
-                        </a>
-                      ) : (
-                        <span className="text-gray-400">Not uploaded</span>
-                      )}
-                    </td>
+          <div className="overflow-hidden rounded-xl border border-gray-200">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Request ID</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Cargo</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Driver Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Driver Waybill</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Client Name</th>
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Client Waybill</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200 bg-white">
+                  {waybillRequests.map(request => (
+                    <tr key={request.id} className="hover:bg-gray-50 transition-colors duration-150">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900 bg-gray-100 px-3 py-1 rounded-lg inline-block">
+                          {request.id.slice(0, 8)}...
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {request.cargo}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div className="flex items-center">
+                          <User className="w-4 h-4 text-gray-400 mr-2" />
+                          {request.driverName}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {request.driverWaybillUrl ? (
+                          <a 
+                            href={request.driverWaybillUrl} 
+                            target="_blank" 
+                            className="text-blue-600 hover:text-blue-800 flex items-center space-x-2 transition-colors duration-200"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>View Waybill</span>
+                          </a>
+                        ) : (
+                          <span className="text-gray-400 flex items-center space-x-2">
+                            <FileText className="w-4 h-4" />
+                            <span>Not uploaded</span>
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {request.clientName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {request.clientWaybillUrl ? (
+                          <a 
+                            href={request.clientWaybillUrl} 
+                            target="_blank" 
+                            className="text-blue-600 hover:text-blue-800 flex items-center space-x-2 transition-colors duration-200"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>View Waybill</span>
+                          </a>
+                        ) : (
+                          <span className="text-gray-400 flex items-center space-x-2">
+                            <FileText className="w-4 h-4" />
+                            <span>Not uploaded</span>
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </Section>
@@ -643,7 +773,7 @@ const Documents = ({ requests }) => {
   );
 };
 
-// --- UPDATED USER MANAGEMENT COMPONENT ---
+// --- USER MANAGEMENT COMPONENT ---
 const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver }) => {
   const [activeTab, setActiveTab] = useState('users');
   const [editingUser, setEditingUser] = useState(null);
@@ -684,12 +814,12 @@ const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver
     };
 
     return (
-      <Card className="p-6 mb-6">
-        <h3 className="font-semibold text-gray-900 mb-4">
+      <Card className="mb-6">
+        <h3 className="font-semibold text-gray-900 text-lg mb-4">
           {user ? 'Edit User' : 'Create New User'}
         </h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Input
               label="Full Name"
               value={formData.name}
@@ -726,7 +856,7 @@ const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver
               />
               <button
                 type="button"
-                className="absolute right-3 top-8 text-gray-500"
+                className="absolute right-3 top-9 text-gray-500 hover:text-gray-700 transition-colors duration-200"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -758,7 +888,7 @@ const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver
               Active Account
             </label>
           </div>
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
             <Button type="button" variant="secondary" onClick={onCancel}>
               Cancel
             </Button>
@@ -785,12 +915,12 @@ const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver
     };
 
     return (
-      <Card className="p-6 mb-6">
-        <h3 className="font-semibold text-gray-900 mb-4">
+      <Card className="mb-6">
+        <h3 className="font-semibold text-gray-900 text-lg mb-4">
           {driver ? 'Edit Driver Details' : 'Add Driver Details'}
         </h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FileUpload
               label="Driver License"
               onFileChange={(e) => {
@@ -822,7 +952,7 @@ const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver
               onChange={(e) => setFormData({ ...formData, carOwnerTelephone: e.target.value })}
             />
           </div>
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
             <Button type="button" variant="secondary" onClick={onCancel}>
               Cancel
             </Button>
@@ -836,9 +966,10 @@ const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <Header 
         title="User Management" 
+        description="Manage user accounts, roles, and driver details across the platform"
         actions={
           <Button onClick={() => setEditingUser({})}>
             <UserPlus className="w-4 h-4 mr-2" />
@@ -848,30 +979,30 @@ const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver
       />
 
       {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
+      <Card className="p-2">
+        <nav className="flex space-x-1">
           <button
             onClick={() => setActiveTab('users')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+            className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
               activeTab === 'users'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-blue-100 text-blue-700 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
             }`}
           >
             User Accounts
           </button>
           <button
             onClick={() => setActiveTab('drivers')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+            className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
               activeTab === 'drivers'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-blue-100 text-blue-700 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
             }`}
           >
             Driver Management
           </button>
         </nav>
-      </div>
+      </Card>
 
       {/* User Accounts Tab */}
       {activeTab === 'users' && (
@@ -884,74 +1015,85 @@ const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver
             />
           )}
 
-          <Section title="All Users">
-            <div className="overflow-hidden rounded-lg border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map(user => (
-                    <tr key={user.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <img
-                            src={user.photoUrl || '/api/placeholder/40/40'}
-                            alt={user.name}
-                            className="w-10 h-10 rounded-full mr-3"
-                          />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                            <div className="text-sm text-gray-500">{user.username}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div>{user.telephone}</div>
-                        <div className="text-gray-500">{user.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant={
-                          user.role === 'admin' ? 'primary' :
-                          user.role === 'driver' ? 'secondary' :
-                          user.role === 'client' ? 'warning' : 'default'
-                        }>
-                          {user.role.toUpperCase()}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant={user.isActive ? 'success' : 'error'}>
-                          {user.isActive ? 'ACTIVE' : 'DISABLED'}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center space-x-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => setEditingUser(user)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="error"
-                            onClick={() => onDeleteUser(user.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
+          <Section 
+            title="All Users" 
+            description="Complete list of all users with their roles and status"
+          >
+            <div className="overflow-hidden rounded-xl border border-gray-200">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">User</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Contact</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Role</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {users.map(user => (
+                      <tr key={user.id} className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <img
+                              src={user.photoUrl || '/api/placeholder/40/40'}
+                              alt={user.name}
+                              className="w-10 h-10 rounded-full mr-3 border-2 border-white shadow-sm"
+                            />
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                              <div className="text-sm text-gray-500">{user.username}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div className="flex items-center text-gray-500 mb-1">
+                            <Phone className="w-4 h-4 mr-2" />
+                            {user.telephone}
+                          </div>
+                          <div className="flex items-center text-gray-500">
+                            <Mail className="w-4 h-4 mr-2" />
+                            {user.email}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Badge variant={
+                            user.role === 'admin' ? 'primary' :
+                            user.role === 'driver' ? 'secondary' :
+                            user.role === 'client' ? 'warning' : 'default'
+                          }>
+                            {user.role.toUpperCase()}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Badge variant={user.isActive ? 'success' : 'error'}>
+                            {user.isActive ? 'ACTIVE' : 'DISABLED'}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center space-x-2 justify-end">
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => setEditingUser(user)}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="error"
+                              onClick={() => onDeleteUser(user.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </Section>
         </>
@@ -968,69 +1110,79 @@ const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver
             />
           )}
 
-          <Section title="Driver Details Management">
-            <div className="overflow-hidden rounded-lg border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car Owner</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver License</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {drivers.map(driver => (
-                    <tr key={driver.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <img
-                            src={driver.photoUrl}
-                            alt={driver.name}
-                            className="w-10 h-10 rounded-full mr-3 object-cover"
-                          />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{driver.name}</div>
-                            <div className="text-sm text-gray-500">{driver.telephone}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {driver.truckNumber || 'Not assigned'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div>{driver.carOwnerName || 'N/A'}</div>
-                        <div className="text-gray-500">{driver.carOwnerTelephone || ''}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        {driver.driverLicenseUrl ? (
-                          <a
-                            href={driver.driverLicenseUrl}
-                            target="_blank"
-                            className="text-blue-600 hover:text-blue-800 flex items-center space-x-1"
-                          >
-                            <FileText className="w-4 h-4" />
-                            <span>View License</span>
-                          </a>
-                        ) : (
-                          <span className="text-gray-400">Not uploaded</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => setEditingDriver(driver)}
-                        >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit Details
-                        </Button>
-                      </td>
+          <Section 
+            title="Driver Details Management" 
+            description="Manage driver licenses, truck assignments, and owner information"
+          >
+            <div className="overflow-hidden rounded-xl border border-gray-200">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Driver</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Truck Number</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Car Owner</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Driver License</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {drivers.map(driver => (
+                      <tr key={driver.id} className="hover:bg-gray-50 transition-colors duration-150">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <img
+                              src={driver.photoUrl}
+                              alt={driver.name}
+                              className="w-10 h-10 rounded-full mr-3 object-cover border-2 border-white shadow-sm"
+                            />
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{driver.name}</div>
+                              <div className="text-sm text-gray-500">{driver.telephone}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {driver.truckNumber || (
+                            <span className="text-gray-400">Not assigned</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div>{driver.carOwnerName || 'N/A'}</div>
+                          <div className="text-gray-500">{driver.carOwnerTelephone || ''}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {driver.driverLicenseUrl ? (
+                            <a
+                              href={driver.driverLicenseUrl}
+                              target="_blank"
+                              className="text-blue-600 hover:text-blue-800 flex items-center space-x-2 transition-colors duration-200"
+                            >
+                              <FileText className="w-4 h-4" />
+                              <span>View License</span>
+                            </a>
+                          ) : (
+                            <span className="text-gray-400 flex items-center space-x-2">
+                              <FileText className="w-4 h-4" />
+                              <span>Not uploaded</span>
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => setEditingDriver(driver)}
+                          >
+                            <Edit className="w-4 h-4 mr-1" />
+                            Edit Details
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </Section>
         </>
@@ -1039,7 +1191,7 @@ const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver
   );
 };
 
-// --- UPDATED SETTINGS COMPONENT WITH USER PROFILE EDITING ---
+// --- SETTINGS COMPONENT ---
 const Settings = ({ currentUser, onSaveUser }) => {
   const [activeTab, setActiveTab] = useState('profile');
   const [userData, setUserData] = useState(currentUser);
@@ -1072,54 +1224,36 @@ const Settings = ({ currentUser, onSaveUser }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <Header title="Settings & Profile" />
+    <div className="space-y-8">
+      <Header 
+        title="Settings & Profile" 
+        description="Manage your account settings, preferences, and security options"
+      />
       
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Sidebar Navigation */}
         <div className="lg:col-span-1">
-          <Card className="p-4">
+          <Card className="p-6">
             <nav className="space-y-2">
-              <button
-                onClick={() => setActiveTab('profile')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === 'profile'
-                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Profile Settings
-              </button>
-              <button
-                onClick={() => setActiveTab('security')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === 'security'
-                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Security
-              </button>
-              <button
-                onClick={() => setActiveTab('preferences')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === 'preferences'
-                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Preferences
-              </button>
-              <button
-                onClick={() => setActiveTab('notifications')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === 'notifications'
-                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Notifications
-              </button>
+              {[
+                { id: 'profile', label: 'Profile Settings', icon: User },
+                { id: 'security', label: 'Security', icon: Shield },
+                { id: 'preferences', label: 'Preferences', icon: SettingsIcon },
+                { id: 'notifications', label: 'Notifications', icon: Bell }
+              ].map(item => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-3 ${
+                    activeTab === item.id
+                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </button>
+              ))}
             </nav>
           </Card>
         </div>
@@ -1127,26 +1261,29 @@ const Settings = ({ currentUser, onSaveUser }) => {
         {/* Main Content */}
         <div className="lg:col-span-3">
           {activeTab === 'profile' && (
-            <Section title="Profile Settings">
+            <Section 
+              title="Profile Settings" 
+              description="Update your personal information and profile photo"
+            >
               {saved && (
-                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center">
-                  <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-                  <span className="text-green-700 text-sm">Profile updated successfully!</span>
+                <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center">
+                  <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                  <span className="text-green-700 text-sm font-medium">Profile updated successfully!</span>
                 </div>
               )}
               
-              <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex flex-col md:flex-row gap-8">
                 {/* Profile Photo */}
                 <div className="flex-shrink-0">
                   <div className="relative">
                     <img
                       src={userData.photoUrl || '/api/placeholder/150/150'}
                       alt={userData.name}
-                      className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                      className="w-32 h-32 rounded-2xl object-cover border-4 border-white shadow-lg"
                     />
                     {isEditing && (
-                      <label className="absolute bottom-2 right-2 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-lg hover:bg-blue-700 transition-colors">
-                        <Camera className="w-4 h-4" />
+                      <label className="absolute bottom-2 right-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 rounded-full cursor-pointer shadow-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200">
+                        <Camera className="w-5 h-5" />
                         <input
                           type="file"
                           accept="image/*"
@@ -1160,8 +1297,8 @@ const Settings = ({ currentUser, onSaveUser }) => {
 
                 {/* Profile Form */}
                 <div className="flex-1">
-                  <form onSubmit={handleSave} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <form onSubmit={handleSave} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <Input
                         label="Full Name"
                         value={userData.name}
@@ -1195,7 +1332,7 @@ const Settings = ({ currentUser, onSaveUser }) => {
                     </div>
 
                     {isEditing && (
-                      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                      <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                         <Button type="button" variant="secondary" onClick={handleCancel}>
                           Cancel
                         </Button>
@@ -1208,7 +1345,7 @@ const Settings = ({ currentUser, onSaveUser }) => {
                   </form>
 
                   {!isEditing && (
-                    <div className="flex justify-end pt-4 border-t border-gray-200">
+                    <div className="flex justify-end pt-6 border-t border-gray-200">
                       <Button onClick={() => setIsEditing(true)}>
                         <Edit className="w-4 h-4 mr-2" />
                         Edit Profile
@@ -1221,9 +1358,12 @@ const Settings = ({ currentUser, onSaveUser }) => {
           )}
 
           {activeTab === 'security' && (
-            <Section title="Security Settings">
-              <form onSubmit={handleSave} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Section 
+              title="Security Settings" 
+              description="Manage your password and account security preferences"
+            >
+              <form onSubmit={handleSave} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="relative">
                     <Input
                       label="Current Password"
@@ -1256,7 +1396,7 @@ const Settings = ({ currentUser, onSaveUser }) => {
                 </div>
 
                 {isEditing && (
-                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                     <Button type="button" variant="secondary" onClick={handleCancel}>
                       Cancel
                     </Button>
@@ -1269,7 +1409,7 @@ const Settings = ({ currentUser, onSaveUser }) => {
               </form>
 
               {!isEditing && (
-                <div className="flex justify-end pt-4 border-t border-gray-200">
+                <div className="flex justify-end pt-6 border-t border-gray-200">
                   <Button onClick={() => setIsEditing(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Change Password
@@ -1278,20 +1418,20 @@ const Settings = ({ currentUser, onSaveUser }) => {
               )}
 
               {/* Security Status */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-3">Security Status</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
+              <div className="mt-8 p-6 bg-gray-50 rounded-2xl border border-gray-200">
+                <h4 className="font-semibold text-gray-900 text-lg mb-4">Security Status</h4>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
                     <span className="text-sm text-gray-600">Last password change</span>
-                    <span className="text-sm text-gray-900">2 months ago</span>
+                    <span className="text-sm font-medium text-gray-900">2 months ago</span>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between py-3 border-b border-gray-200">
                     <span className="text-sm text-gray-600">Two-factor authentication</span>
                     <Badge variant="error">Disabled</Badge>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between py-3">
                     <span className="text-sm text-gray-600">Login activity</span>
-                    <span className="text-sm text-gray-900">Active now</span>
+                    <span className="text-sm font-medium text-green-600">Active now</span>
                   </div>
                 </div>
               </div>
@@ -1299,8 +1439,11 @@ const Settings = ({ currentUser, onSaveUser }) => {
           )}
 
           {activeTab === 'preferences' && (
-            <Section title="Preferences">
-              <div className="space-y-4">
+            <Section 
+              title="Preferences" 
+              description="Customize your language, timezone, and email preferences"
+            >
+              <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
                   <Select
@@ -1324,36 +1467,36 @@ const Settings = ({ currentUser, onSaveUser }) => {
                   />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="block text-sm font-medium text-gray-700">Email Preferences</label>
-                  <div className="space-y-2">
-                    <div className="flex items-center">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Receive email notifications</p>
+                        <p className="text-sm text-gray-600">Get important updates about your shipments</p>
+                      </div>
                       <input
                         type="checkbox"
-                        id="emailNotifications"
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         disabled={!isEditing}
                       />
-                      <label htmlFor="emailNotifications" className="ml-2 text-sm text-gray-700">
-                        Receive email notifications
-                      </label>
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Receive marketing emails</p>
+                        <p className="text-sm text-gray-600">Updates about new features and services</p>
+                      </div>
                       <input
                         type="checkbox"
-                        id="marketingEmails"
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         disabled={!isEditing}
                       />
-                      <label htmlFor="marketingEmails" className="ml-2 text-sm text-gray-700">
-                        Receive marketing emails
-                      </label>
                     </div>
                   </div>
                 </div>
 
                 {isEditing && (
-                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                     <Button type="button" variant="secondary" onClick={handleCancel}>
                       Cancel
                     </Button>
@@ -1366,7 +1509,7 @@ const Settings = ({ currentUser, onSaveUser }) => {
               </div>
 
               {!isEditing && (
-                <div className="flex justify-end pt-4 border-t border-gray-200">
+                <div className="flex justify-end pt-6 border-t border-gray-200">
                   <Button onClick={() => setIsEditing(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Preferences
@@ -1377,12 +1520,15 @@ const Settings = ({ currentUser, onSaveUser }) => {
           )}
 
           {activeTab === 'notifications' && (
-            <Section title="Notification Settings">
+            <Section 
+              title="Notification Settings" 
+              description="Configure how and when you receive notifications"
+            >
               <div className="space-y-6">
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-3">Push Notifications</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
+                  <h4 className="font-semibold text-gray-900 text-lg mb-4">Push Notifications</h4>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
                       <div>
                         <p className="text-sm font-medium text-gray-900">New Requests</p>
                         <p className="text-sm text-gray-600">Get notified when new shipment requests arrive</p>
@@ -1393,7 +1539,7 @@ const Settings = ({ currentUser, onSaveUser }) => {
                         disabled={!isEditing}
                       />
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
                       <div>
                         <p className="text-sm font-medium text-gray-900">Driver Updates</p>
                         <p className="text-sm text-gray-600">Notifications about driver status changes</p>
@@ -1404,7 +1550,7 @@ const Settings = ({ currentUser, onSaveUser }) => {
                         disabled={!isEditing}
                       />
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
                       <div>
                         <p className="text-sm font-medium text-gray-900">Messages</p>
                         <p className="text-sm text-gray-600">Notifications for new messages</p>
@@ -1419,7 +1565,7 @@ const Settings = ({ currentUser, onSaveUser }) => {
                 </div>
 
                 {isEditing && (
-                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
                     <Button type="button" variant="secondary" onClick={handleCancel}>
                       Cancel
                     </Button>
@@ -1432,7 +1578,7 @@ const Settings = ({ currentUser, onSaveUser }) => {
               </div>
 
               {!isEditing && (
-                <div className="flex justify-end pt-4 border-t border-gray-200">
+                <div className="flex justify-end pt-6 border-t border-gray-200">
                   <Button onClick={() => setIsEditing(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Notifications
@@ -1447,7 +1593,7 @@ const Settings = ({ currentUser, onSaveUser }) => {
   );
 };
 
-// --- DATA STRUCTURES ----------------------------------------------------
+// --- DATA STRUCTURES & UTILITIES ---
 const now = () => new Date().toISOString();
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substring(2);
 
@@ -1455,7 +1601,6 @@ const SEED_CAR_OWNER_ID = "co1";
 const SEED_DRIVER_ID = "d1";
 const SEED_OWNER_ID = "o1";
 
-// NEW: Request Statuses
 const REQUEST_STATUSES = {
     PENDING: 'pending',
     APPROVED_BY_DRIVER: 'approved_by_driver',
@@ -1465,7 +1610,6 @@ const REQUEST_STATUSES = {
     CANCELED: 'canceled'
 };
 
-// EXPANDED DRIVER STATUS OPTIONS
 const DRIVER_STATUS_OPTIONS = [
   { value: "idle", label: "Idle", color: "gray" },
   { value: "pending_request", label: "Pending Request", color: "orange" }, 
@@ -1612,7 +1756,6 @@ const seedUsers = [
     },
 ];
 
-// Seed messages for the messaging system
 const seedMessages = [
   {
     id: 'm1',
@@ -1684,7 +1827,6 @@ const getRequestStatusVariant = (status) => {
 };
 
 // --- TRACKING STATUS COMPONENT ---
-
 const TrackingStatus = ({ drivers, className = "" }) => {
   const activeDrivers = drivers.filter(driver => 
     driver.status !== 'idle' && driver.assignedClientId
@@ -1704,13 +1846,19 @@ const TrackingStatus = ({ drivers, className = "" }) => {
   };
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 ${className}`}>
-      <h3 className="font-semibold text-gray-900 mb-4">Live Tracking</h3>
+    <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-8 ${className}`}>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="font-semibold text-gray-900 text-xl">Live Tracking</h3>
+        <Badge variant="primary" className="text-xs">
+          {activeDrivers.length} Active
+        </Badge>
+      </div>
       
       {activeDrivers.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-          <p>No active deliveries</p>
+          <Package className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+          <p className="font-medium">No active deliveries</p>
+          <p className="text-sm text-gray-600 mt-1">All drivers are currently idle</p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -1719,21 +1867,21 @@ const TrackingStatus = ({ drivers, className = "" }) => {
             const progress = driver.routeProgress || 0;
             
             return (
-              <div key={driver.id} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
+              <Card key={driver.id} className="border border-gray-200 hover:border-blue-200 transition-all duration-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-4">
                     <img 
                       src={driver.photoUrl} 
                       alt={driver.name}
-                      className="w-10 h-10 rounded-full object-cover"
+                      className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
                     />
                     <div>
-                      <h4 className="font-medium text-gray-900">{driver.name}</h4>
+                      <h4 className="font-semibold text-gray-900">{driver.name}</h4>
                       <p className="text-sm text-gray-600">{driver.truckNumber}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusInfo.color} text-white`}>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusInfo.color} text-white`}>
                       {statusInfo.label}
                     </span>
                     <p className="text-sm text-gray-600 mt-1">{progress}% complete</p>
@@ -1741,8 +1889,8 @@ const TrackingStatus = ({ drivers, className = "" }) => {
                 </div>
                 
                 {/* Progress bar */}
-                <div className="mb-3">
-                  <div className="flex justify-between text-xs text-gray-600 mb-1">
+                <div className="mb-4">
+                  <div className="flex justify-between text-sm text-gray-600 mb-2">
                     <span>Origin</span>
                     <span>Destination</span>
                   </div>
@@ -1755,15 +1903,16 @@ const TrackingStatus = ({ drivers, className = "" }) => {
                 </div>
                 
                 {/* Status timeline */}
-                <div className="flex justify-between relative">
+                <div className="flex justify-between relative mb-4">
+                  <div className="absolute top-3 left-0 right-0 h-0.5 bg-gray-200 -z-10"></div>
                   {[1, 2, 3, 4, 5].map(step => (
                     <div key={step} className="flex flex-col items-center">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs ${
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium border-2 border-white shadow-sm ${
                         step <= statusInfo.step ? statusInfo.color : 'bg-gray-300'
                       }`}>
                         {step}
                       </div>
-                      <span className="text-xs text-gray-600 mt-1 text-center">
+                      <span className="text-xs text-gray-600 mt-2 text-center">
                         {['Loading', 'Transit', 'Customs', 'Unloading', 'Delivered'][step - 1]}
                       </span>
                     </div>
@@ -1771,11 +1920,11 @@ const TrackingStatus = ({ drivers, className = "" }) => {
                 </div>
                 
                 {/* Current location */}
-                <div className="flex items-center space-x-2 mt-3 text-sm text-gray-600">
+                <div className="flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 p-3 rounded-xl">
                   <Navigation className="w-4 h-4 text-blue-500" />
                   <span>Current: {driver.currentLocation ? `${driver.currentLocation.lat.toFixed(4)}, ${driver.currentLocation.lng.toFixed(4)}` : 'Tracking...'}</span>
                 </div>
-              </div>
+              </Card>
             );
           })}
         </div>
@@ -1798,11 +1947,11 @@ const Sidebar = ({ currentTab, setTab }) => {
     { id: "settings", label: "Settings", icon: SettingsIcon },
   ];
   return (
-    <div className="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white h-screen flex flex-col">
+    <div className="w-64 bg-gradient-to-b from-blue-900 to-blue-800 text-white h-screen flex flex-col fixed left-0 top-0 z-50">
       <div className="p-6 border-b border-blue-700">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-            <Truck className="w-6 h-6 text-blue-600" />
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
+            <Truck className="w-7 h-7 text-blue-600" />
           </div>
           <div>
             <h1 className="text-xl font-bold">HeeyLogistics</h1>
@@ -1810,14 +1959,14 @@ const Sidebar = ({ currentTab, setTab }) => {
           </div>
         </div>
       </div>
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-2">
         {menuItems.map(item => {
           const Icon = item.icon;
           return (
             <button
               key={item.id}
               onClick={() => setTab(item.id)}
-              className={`w-full flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+              className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
                 currentTab === item.id 
                   ? "bg-blue-700 text-white shadow-md" 
                   : "text-blue-100 hover:bg-blue-700/50 hover:text-white"
@@ -1830,15 +1979,15 @@ const Sidebar = ({ currentTab, setTab }) => {
         })}
       </nav>
       <div className="p-4 border-t border-blue-700">
-        <div className="flex items-center space-x-3 p-3 rounded-lg bg-blue-700/30">
-          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-            <span className="text-sm font-semibold">A</span>
+        <div className="flex items-center space-x-3 p-3 rounded-xl bg-blue-700/30 backdrop-blur-sm">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+            <span className="text-sm font-semibold text-white">A</span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">Admin User</p>
             <p className="text-xs text-blue-200 truncate">Administrator</p>
           </div>
-          <Button variant="outline" size="sm" className="!text-blue-200 !border-blue-600">
+          <Button variant="outline" size="sm" className="!text-blue-200 !border-blue-600 hover:!bg-blue-600">
             <LogOut className="w-4 h-4" />
           </Button>
         </div>
@@ -1847,77 +1996,105 @@ const Sidebar = ({ currentTab, setTab }) => {
   );
 };
 
-// --- REQUEST MANAGEMENT COMPONENT (Admin View) --------------------------------
+// --- REQUEST MANAGEMENT COMPONENT ---
 const RequestManagement = ({ requests, drivers, onDriverResponse }) => {
     return (
-        <div className="space-y-6">
-            <Header title="Request & Order Management" />
-            <Section title="All Logistics Requests">
-                <div className="overflow-hidden rounded-lg border border-gray-200">
-                    <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+        <div className="space-y-8">
+            <Header 
+                title="Request & Order Management" 
+                description="Monitor and manage all logistics requests and order statuses"
+            />
+            <Section 
+                title="All Logistics Requests" 
+                description="Complete overview of all shipment requests with their current status"
+            >
+                <div className="overflow-hidden rounded-xl border border-gray-200">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID / Cargo</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tracking Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waybills</th>
-                                <th className="relative px-6 py-3">Actions</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">ID / Cargo</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Client</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Driver</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Request Status</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Tracking Status</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Waybills</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="divide-y divide-gray-200 bg-white">
                             {requests.map(req => {
                                 const driver = drivers.find(d => d.id === req.driverId);
                                 return (
-                                <tr key={req.id}>
+                                <tr key={req.id} className="hover:bg-gray-50 transition-colors duration-150">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <p className="font-medium text-gray-900 truncate w-32">{req.cargo}</p>
                                         <p className="text-sm text-gray-500">Route: {req.origin} to {req.destination}</p>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{req.clientName}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{req.driverName}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                      <div className="flex items-center">
+                                        <User className="w-4 h-4 text-gray-400 mr-2" />
+                                        {req.driverName}
+                                      </div>
+                                    </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <Badge variant={getRequestStatusVariant(req.status)}>{req.status.replace(/_/g, ' ').toUpperCase()}</Badge>
+                                        <Badge variant={getRequestStatusVariant(req.status)}>
+                                          {req.status.replace(/_/g, ' ').toUpperCase()}
+                                        </Badge>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         {req.status === REQUEST_STATUSES.ACCEPTED ? (
-                                            <Badge variant={getStatusColor(driver?.status)}>{driver?.status.toUpperCase().replace(/_/g, ' ') || 'IDLE'}</Badge>
+                                            <Badge variant={getStatusColor(driver?.status)}>
+                                              {driver?.status.toUpperCase().replace(/_/g, ' ') || 'IDLE'}
+                                            </Badge>
                                         ) : (
                                             <span className="text-sm text-gray-500">N/A</span>
                                         )}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        <a href={req.driverWaybillUrl} target="_blank" className={`text-blue-600 hover:text-blue-800 ${!req.driverWaybillUrl ? 'opacity-50 pointer-events-none' : ''}`}>Driver WB {req.driverWaybillUrl ? '✔' : '❌'}</a><br/>
-                                        <a href={req.clientWaybillUrl} target="_blank" className={`text-blue-600 hover:text-blue-800 ${!req.clientWaybillUrl ? 'opacity-50 pointer-events-none' : ''}`}>Client WB {req.clientWaybillUrl ? '✔' : '❌'}</a>
+                                        <a href={req.driverWaybillUrl} target="_blank" className={`text-blue-600 hover:text-blue-800 flex items-center space-x-1 transition-colors duration-200 ${!req.driverWaybillUrl ? 'opacity-50 pointer-events-none' : ''}`}>
+                                          <FileText className="w-4 h-4" /> 
+                                          <span>Driver WB {req.driverWaybillUrl ? '✔' : '❌'}</span>
+                                        </a>
+                                        <a href={req.clientWaybillUrl} target="_blank" className={`text-blue-600 hover:text-blue-800 flex items-center space-x-1 transition-colors duration-200 mt-1 ${!req.clientWaybillUrl ? 'opacity-50 pointer-events-none' : ''}`}>
+                                          <FileText className="w-4 h-4" /> 
+                                          <span>Client WB {req.clientWaybillUrl ? '✔' : '❌'}</span>
+                                        </a>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td className="px-6 py-4 whitespace-nowrap">
                                         {req.status === REQUEST_STATUSES.PENDING && (
-                                            <div className="space-x-2">
-                                                <Button size="sm" variant="success" onClick={() => onDriverResponse(req.id, 'accept')}>Force Accept</Button>
+                                            <div className="flex space-x-2">
+                                                <Button size="sm" variant="success" onClick={() => onDriverResponse(req.id, 'accept')}>
+                                                  Force Accept
+                                                </Button>
                                             </div>
                                         )}
                                         {req.status === REQUEST_STATUSES.ACCEPTED && (
-                                            <Button size="sm" variant="secondary" onClick={() => onDriverResponse(req.id, 'completed')}>Mark Complete</Button>
+                                            <Button size="sm" variant="secondary" onClick={() => onDriverResponse(req.id, 'completed')}>
+                                              Mark Complete
+                                            </Button>
                                         )}
                                         {(req.status === REQUEST_STATUSES.PENDING || req.status === REQUEST_STATUSES.APPROVED_BY_DRIVER) && (
-                                            <Button size="sm" variant="error" onClick={() => onDriverResponse(req.id, 'reject')} className="ml-2">Reject</Button>
+                                            <Button size="sm" variant="error" onClick={() => onDriverResponse(req.id, 'reject')} className="ml-2">
+                                              Reject
+                                            </Button>
                                         )}
                                     </td>
                                 </tr>
                             )})}
                         </tbody>
                     </table>
+                  </div>
                 </div>
             </Section>
         </div>
     );
 };
 
-// --- DRIVER DASHBOARD VIEW (Driver Role Simulation) ----------------------------
+// --- DRIVER DASHBOARD VIEW ---
 const DriverDashboardView = ({ drivers, requests, onDriverResponse, onDriverStatusUpdate, currentDriver }) => {
     
-    // Filter requests for the current driver
     const pendingRequests = requests.filter(req => req.driverId === currentDriver.id && req.status === REQUEST_STATUSES.PENDING);
     const approvedRequests = requests.filter(req => req.driverId === currentDriver.id && req.status === REQUEST_STATUSES.APPROVED_BY_DRIVER);
     const activeRequests = requests.filter(req => req.driverId === currentDriver.id && req.status === REQUEST_STATUSES.ACCEPTED);
@@ -1925,7 +2102,6 @@ const DriverDashboardView = ({ drivers, requests, onDriverResponse, onDriverStat
     const [newStatus, setNewStatus] = useState(currentDriver.status);
     const [waybillFile, setWaybillFile] = useState(null);
 
-    // Step 8 & 6: Driver Status Change and Waybill Upload
     const handleStatusUpdate = (e) => {
         e.preventDefault();
         onDriverStatusUpdate(currentDriver.id, newStatus, newStatus === 'loading' ? waybillFile : null);
@@ -1933,47 +2109,56 @@ const DriverDashboardView = ({ drivers, requests, onDriverResponse, onDriverStat
     };
     
     return (
-        <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Driver Dashboard: {currentDriver.name}</h2>
+        <div className="space-y-8">
+            <Header 
+                title={`Driver Dashboard: ${currentDriver.name}`} 
+                description="Manage your shipments, update status, and handle waybill documents"
+            />
 
             {/* Status Update & Waybill Upload */}
-            <Section title="Update Current Status (Step 8 & 6)">
-                <form onSubmit={handleStatusUpdate} className="space-y-4">
-                    <div className="flex flex-col md:flex-row items-end space-y-4 md:space-y-0 md:space-x-4">
-                        <div className="flex-1 w-full">
-                            <Select 
-                                label={`Driver Status: ${currentDriver.status.toUpperCase().replace(/_/g, ' ')}`}
-                                value={newStatus}
-                                onChange={(e) => setNewStatus(e.target.value)}
-                                options={DRIVER_STATUS_OPTIONS.filter(o => o.value !== 'pending_request')} 
-                            />
-                        </div>
-                        <div className="flex-1 w-full">
+            <Section 
+                title="Update Current Status" 
+                description="Track your shipment progress and upload required documents"
+            >
+                <form onSubmit={handleStatusUpdate} className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <Select 
+                            label={`Driver Status: ${currentDriver.status.toUpperCase().replace(/_/g, ' ')}`}
+                            value={newStatus}
+                            onChange={(e) => setNewStatus(e.target.value)}
+                            options={DRIVER_STATUS_OPTIONS.filter(o => o.value !== 'pending_request')} 
+                        />
+                        <div>
                             {newStatus === 'loading' && (
                                 <FileUpload 
-                                    label="Upload Waybill Receipt (Step 6)"
+                                    label="Upload Waybill Receipt"
                                     onFileChange={(e) => setWaybillFile(e.target.files[0])}
                                 />
                             )}
                         </div>
-                        <Button type="submit" className="h-10 w-full md:w-auto" disabled={newStatus === currentDriver.status}>Update Status</Button>
                     </div>
+                    <Button type="submit" disabled={newStatus === currentDriver.status}>
+                      Update Status
+                    </Button>
                 </form>
             </Section>
 
             {/* Incoming Requests */}
-            <Section title="Incoming Shipment Requests (Step 3)">
+            <Section 
+                title="Incoming Shipment Requests" 
+                description="Review and respond to new shipment requests from clients"
+            >
                 <div className="space-y-4">
                     {pendingRequests.map(req => (
-                        <Card key={req.id} className="p-4 border border-yellow-200 bg-yellow-50">
+                        <Card key={req.id} className="border border-yellow-200 bg-yellow-50 hover:border-yellow-300">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <h4 className="font-semibold text-gray-900">Request from {req.clientName}</h4>
-                                    <p className="text-sm text-gray-600">Cargo: {req.cargo} | Route: {req.origin} to {req.destination}</p>
+                                    <p className="text-sm text-gray-600 mt-1">Cargo: {req.cargo} | Route: {req.origin} to {req.destination}</p>
                                 </div>
                                 <Badge variant="warning">PENDING</Badge>
                             </div>
-                            <div className="mt-3 pt-3 border-t border-gray-200 flex justify-end space-x-2">
+                            <div className="mt-4 pt-4 border-t border-yellow-200 flex justify-end space-x-3">
                                 <Button size="sm" variant="secondary" onClick={() => onDriverResponse(req.id, 'approve')}>
                                     <CheckCircle className="w-4 h-4 mr-1" /> Approve Request
                                 </Button>
@@ -1983,43 +2168,70 @@ const DriverDashboardView = ({ drivers, requests, onDriverResponse, onDriverStat
                             </div>
                         </Card>
                     ))}
-                    {pendingRequests.length === 0 && <p className="text-gray-500">No new pending requests.</p>}
+                    {pendingRequests.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                            <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                            <p>No new pending requests</p>
+                        </div>
+                    )}
                 </div>
             </Section>
 
-            {/* Approved Requests (Ready for Acceptance) */}
-            <Section title="Approved Requests (Awaiting Acceptance - Step 4)">
+            {/* Approved Requests */}
+            <Section 
+                title="Approved Requests" 
+                description="Requests ready for pickup and assignment"
+            >
                 <div className="space-y-4">
                     {approvedRequests.map(req => (
-                        <Card key={req.id} className="p-4 border border-purple-200 bg-purple-50">
+                        <Card key={req.id} className="border border-purple-200 bg-purple-50 hover:border-purple-300">
                             <div className="flex justify-between items-start">
                                 <div>
                                     <h4 className="font-semibold text-gray-900">Request for {req.cargo}</h4>
-                                    <p className="text-sm text-gray-600">Client: {req.clientName} | **Ready for Pickup**</p>
+                                    <p className="text-sm text-gray-600 mt-1">Client: {req.clientName} | **Ready for Pickup**</p>
                                 </div>
                                 <Badge variant="secondary">APPROVED</Badge>
                             </div>
-                            <div className="mt-3 pt-3 border-t border-gray-200 flex justify-end space-x-2">
+                            <div className="mt-4 pt-4 border-t border-purple-200 flex justify-end">
                                 <Button size="sm" variant="success" onClick={() => onDriverResponse(req.id, 'accept')}>
-                                    <Truck className="w-4 h-4 mr-1" /> Accept & Assign (Step 4 & 5)
+                                    <Truck className="w-4 h-4 mr-1" /> Accept & Assign
                                 </Button>
                             </div>
                         </Card>
                     ))}
-                    {approvedRequests.length === 0 && <p className="text-gray-500">No approved requests ready for acceptance.</p>}
+                    {approvedRequests.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                            <CheckCircle className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                            <p>No approved requests ready for acceptance</p>
+                        </div>
+                    )}
                 </div>
             </Section>
             
             {/* Active Requests */}
-            <Section title="Active Assigned Shipments">
+            <Section 
+                title="Active Assigned Shipments" 
+                description="Currently active shipments with tracking information"
+            >
                 <div className="space-y-4">
                     {activeRequests.map(req => (
-                        <Card key={req.id} className="p-4 border border-blue-200 bg-blue-50">
+                        <Card key={req.id} className="border border-blue-200 bg-blue-50 hover:border-blue-300">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h4 className="font-semibold text-gray-900">{req.cargo} (Route: {req.origin} to {req.destination})</h4>
-                                    <p className="text-sm text-gray-600">Client: {req.clientName} | Current Status: <Badge variant={getStatusColor(currentDriver.status)}>{currentDriver.status.toUpperCase().replace(/_/g, ' ')}</Badge></p>
-                                    <a href={req.driverWaybillUrl} target="_blank" className={`text-blue-600 text-xs mt-1 block ${!req.driverWaybillUrl ? 'opacity-50 pointer-events-none' : ''}`}>Driver Waybill {req.driverWaybillUrl ? '✔' : '❌'}</a>
+                                    <h4 className="font-semibold text-gray-900">{req.cargo}</h4>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                      Route: {req.origin} to {req.destination}
+                                    </p>
+                                    <p className="text-sm text-gray-600">
+                                      Client: {req.clientName} | Current Status: {' '}
+                                      <Badge variant={getStatusColor(currentDriver.status)} className="ml-1">
+                                        {currentDriver.status.toUpperCase().replace(/_/g, ' ')}
+                                      </Badge>
+                                    </p>
+                                    <a href={req.driverWaybillUrl} target="_blank" className={`text-blue-600 text-xs mt-2 block flex items-center space-x-1 ${!req.driverWaybillUrl ? 'opacity-50 pointer-events-none' : ''}`}>
+                                      <FileText className="w-3 h-3" />
+                                      <span>Driver Waybill {req.driverWaybillUrl ? '✔' : '❌'}</span>
+                                    </a>
                                 </div>
                                 <div>
                                     <Badge variant="primary">ACCEPTED</Badge>
@@ -2027,31 +2239,35 @@ const DriverDashboardView = ({ drivers, requests, onDriverResponse, onDriverStat
                             </div>
                         </Card>
                     ))}
-                    {activeRequests.length === 0 && <p className="text-gray-500">No active shipments.</p>}
+                    {activeRequests.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                            <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                            <p>No active shipments</p>
+                        </div>
+                    )}
                 </div>
             </Section>
         </div>
     );
 };
 
-
-// --- DRIVER MANAGEMENT COMPONENT (Admin/Driver View) --------------------------------
+// --- DRIVER MANAGEMENT COMPONENT ---
 const DriverManagement = ({ drivers, requests, onDriverStatusUpdate, onDriverResponse, onSaveDriver, onDeleteDriver }) => {
-    // Simulating the current Driver logged in
     const currentDriver = drivers.find(d => d.id === SEED_DRIVER_ID);
     
-    // --- Admin Form Logic (omitted for brevity) ---
     const [editingDriver, setEditingDriver] = useState(null);
     const [isFormOpen, setIsFormOpen] = useState(false);
     
     if (!currentDriver) return <div>Driver not found.</div>;
 
     return (
-        <div className="space-y-6">
-            {/* REMOVED: Add New Driver button from Header */}
-            <Header title="Driver Management (Admin/Driver View)" />
+        <div className="space-y-8">
+            <Header 
+                title="Driver Management" 
+                description="Admin and driver views for managing driver operations and assignments"
+            />
 
-            {/* --- SIMULATED DRIVER DASHBOARD --- */}
+            {/* Driver Dashboard View */}
             <DriverDashboardView 
                 drivers={drivers}
                 requests={requests}
@@ -2059,28 +2275,31 @@ const DriverManagement = ({ drivers, requests, onDriverStatusUpdate, onDriverRes
                 onDriverStatusUpdate={onDriverStatusUpdate}
                 currentDriver={currentDriver}
             />
-            {/* ---------------------------------- */}
             
             {/* Admin Table View */}
-            <Section title="All Drivers (Admin View)">
-                <div className="overflow-hidden rounded-lg border border-gray-200">
+            <Section 
+                title="All Drivers" 
+                description="Complete overview of all drivers with their current status and assignments"
+            >
+                <div className="overflow-hidden rounded-xl border border-gray-200">
+                  <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50">
+                        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name/Contact</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck/Owner</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verification/Rating</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Client</th>
-                                <th className="relative px-6 py-3">Actions</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Name/Contact</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Truck/Owner</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Verification/Rating</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Current Client</th>
+                                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="divide-y divide-gray-200 bg-white">
                             {drivers.map(driver => (
-                                <tr key={driver.id}>
+                                <tr key={driver.id} className="hover:bg-gray-50 transition-colors duration-150">
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center">
-                                            <img src={driver.photoUrl} alt={driver.name} className="h-10 w-10 rounded-full mr-4 object-cover" />
+                                            <img src={driver.photoUrl} alt={driver.name} className="h-10 w-10 rounded-full mr-4 object-cover border-2 border-white shadow-sm" />
                                             <div>
                                                 <div className="text-sm font-medium text-gray-900">{driver.name}</div>
                                                 <div className="text-sm text-gray-500">{driver.telephone}</div>
@@ -2088,26 +2307,34 @@ const DriverManagement = ({ drivers, requests, onDriverStatusUpdate, onDriverRes
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        <p>{driver.truckNumber}</p>
+                                        <p className="font-medium">{driver.truckNumber}</p>
                                         <p className="text-xs text-gray-500">{driver.carOwnerName || 'N/A'}</p>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <Badge variant={getStatusColor(driver.status)}>{driver.status.toUpperCase().replace(/_/g, ' ')}</Badge>
+                                        <Badge variant={getStatusColor(driver.status)}>
+                                          {driver.status.toUpperCase().replace(/_/g, ' ')}
+                                        </Badge>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-3">
                                             {driver.identityVerified ? (
-                                                <Badge variant="success"><Shield className="w-3 h-3 mr-1" /> Verified</Badge>
+                                                <Badge variant="success" className="text-xs">
+                                                  <Shield className="w-3 h-3 mr-1" /> Verified
+                                                </Badge>
                                             ) : (
-                                                <Badge variant="error"><AlertCircle className="w-3 h-3 mr-1" /> Unverified</Badge>
+                                                <Badge variant="error" className="text-xs">
+                                                  <AlertCircle className="w-3 h-3 mr-1" /> Unverified
+                                                </Badge>
                                             )}
+                                            <RatingStars rating={driver.rating} />
                                         </div>
-                                        <RatingStars rating={driver.rating} />
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {driver.assignedClientId || 'None'}
+                                        {driver.assignedClientId || (
+                                          <span className="text-gray-400">None</span>
+                                        )}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td className="px-6 py-4 whitespace-nowrap">
                                         <div className="flex items-center space-x-2 justify-end">
                                             <Button size="sm" variant="secondary" onClick={() => {}}>
                                                 <Upload className="w-4 h-4" />
@@ -2124,16 +2351,16 @@ const DriverManagement = ({ drivers, requests, onDriverStatusUpdate, onDriverRes
                             ))}
                         </tbody>
                     </table>
+                  </div>
                 </div>
             </Section>
         </div>
     );
 };
 
-// --- CLIENT DASHBOARD VIEW (Client Role Simulation) ----------------------------
+// --- CLIENT DASHBOARD VIEW ---
 const ClientDashboardView = ({ drivers, requests, currentClient, onSendRequest, onClientWaybillUpload }) => {
     
-    // Step 1: Available drivers must be idle and not tied to a pending request
     const availableDrivers = drivers.filter(d => 
         d.status === 'idle' && 
         !requests.some(r => r.driverId === d.id && r.status !== REQUEST_STATUSES.REJECTED && r.status !== REQUEST_STATUSES.COMPLETED)
@@ -2142,11 +2369,9 @@ const ClientDashboardView = ({ drivers, requests, currentClient, onSendRequest, 
     const [selectedDriverId, setSelectedDriverId] = useState(null);
     const [cargoDetails, setCargoDetails] = useState({ cargo: '', origin: 'Berbera Port', destination: 'Hargeisa Warehouse' });
 
-    // Find the currently active request for tracking for the current client
     const activeRequest = requests.find(r => r.clientId === currentClient.id && r.status === REQUEST_STATUSES.ACCEPTED);
     const assignedDriver = activeRequest ? drivers.find(d => d.id === activeRequest.driverId) : null;
     
-    // Step 2: Client sends request
     const handleRequestSubmit = () => {
         if (selectedDriverId && cargoDetails.cargo && cargoDetails.origin && cargoDetails.destination) {
             onSendRequest(currentClient.id, selectedDriverId, cargoDetails.cargo, cargoDetails.origin, cargoDetails.destination);
@@ -2157,61 +2382,101 @@ const ClientDashboardView = ({ drivers, requests, currentClient, onSendRequest, 
         }
     };
 
-    // Step 7: Client waybill upload
     const handleWaybillUpload = (requestId, file) => {
         onClientWaybillUpload(requestId, file);
     };
 
     return (
-        <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Client Dashboard: {currentClient.name}</h2>
+        <div className="space-y-8">
+            <Header 
+                title={`Client Dashboard: ${currentClient.name}`} 
+                description="Manage your shipments, track drivers, and upload required documents"
+            />
 
-            {/* Step 9: Client Tracks Status */}
-            <Section title="Active Order Tracking (Step 9)">
+            {/* Active Order Tracking */}
+            <Section 
+                title="Active Order Tracking" 
+                description="Real-time tracking of your current shipments and driver status"
+            >
                 {assignedDriver ? (
                     <div>
-                        <h3 className="font-medium text-gray-900">Driver: {assignedDriver.name} | Truck: {assignedDriver.truckNumber}</h3>
-                        <p className="text-sm text-gray-600 mb-2">Request ID: {activeRequest.id.slice(0, 6)} | Cargo: {activeRequest.cargo}</p>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-4 mb-6">
+                            <img 
+                                src={assignedDriver.photoUrl} 
+                                alt={assignedDriver.name}
+                                className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                            />
+                            <div>
+                                <h3 className="font-semibold text-gray-900">Driver: {assignedDriver.name}</h3>
+                                <p className="text-sm text-gray-600">Truck: {assignedDriver.truckNumber}</p>
+                            </div>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-4">
+                          Request ID: {activeRequest.id.slice(0, 6)} | Cargo: {activeRequest.cargo}
+                        </p>
+                        <div className="flex items-center space-x-3 mb-4">
                             <Clock className="w-5 h-5 text-blue-500" />
-                            <p className="text-lg font-bold text-gray-900">Current Status: <Badge variant={getStatusColor(assignedDriver.status)}>{assignedDriver.status.toUpperCase().replace(/_/g, ' ')}</Badge></p>
+                            <p className="text-lg font-bold text-gray-900">
+                              Current Status: {' '}
+                              <Badge variant={getStatusColor(assignedDriver.status)} className="ml-2">
+                                {assignedDriver.status.toUpperCase().replace(/_/g, ' ')}
+                              </Badge>
+                            </p>
                         </div>
                         <TrackingStatus drivers={[assignedDriver]} className="mt-4 p-0 shadow-none border-none" />
                     </div>
                 ) : (
-                    <p className="text-gray-500">No active assigned drivers. Send a request below to get started!</p>
+                    <div className="text-center py-8 text-gray-500">
+                        <Truck className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                        <p className="font-medium">No active assigned drivers</p>
+                        <p className="text-sm text-gray-600 mt-1">Send a request below to get started!</p>
+                    </div>
                 )}
             </Section>
 
-            {/* Step 1 & 2: View Available Drivers and Send Request */}
-            <Section title="Send New Shipment Request (Steps 1 & 2)">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div className="lg:col-span-2 space-y-4">
-                        <h3 className="font-medium text-gray-900">Available Drivers/Tracks (Step 1)</h3>
-                        <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+            {/* Send New Shipment Request */}
+            <Section 
+                title="Send New Shipment Request" 
+                description="Select available drivers and provide shipment details for new requests"
+            >
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-6">
+                        <h3 className="font-semibold text-gray-900 text-lg">Available Drivers/Trucks</h3>
+                        <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                             {availableDrivers.map(driver => (
                                 <Card 
                                     key={driver.id} 
-                                    className={`p-3 cursor-pointer transition ${selectedDriverId === driver.id ? 'border-blue-500 ring-2 ring-blue-500' : 'hover:border-blue-300'}`}
+                                    className={`p-4 cursor-pointer transition-all duration-200 ${
+                                        selectedDriverId === driver.id 
+                                          ? 'border-blue-500 ring-2 ring-blue-500 bg-blue-50' 
+                                          : 'hover:border-blue-300'
+                                    }`}
                                     onClick={() => setSelectedDriverId(driver.id)}
                                 >
                                     <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-3">
-                                            <User className="w-5 h-5 text-blue-600" />
+                                        <div className="flex items-center space-x-4">
+                                            <User className="w-8 h-8 text-blue-600" />
                                             <div>
                                                 <p className="font-medium text-gray-900">{driver.name}</p>
                                                 <p className="text-sm text-gray-600">{driver.truckNumber}</p>
                                             </div>
                                         </div>
-                                        {selectedDriverId === driver.id && <CheckCircle className="w-5 h-5 text-green-500" />}
+                                        {selectedDriverId === driver.id && (
+                                          <CheckCircle className="w-6 h-6 text-green-500" />
+                                        )}
                                     </div>
                                 </Card>
                             ))}
-                            {availableDrivers.length === 0 && <p className="text-gray-500 text-center">No idle drivers available right now.</p>}
+                            {availableDrivers.length === 0 && (
+                                <div className="text-center py-8 text-gray-500">
+                                    <User className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                    <p>No idle drivers available right now</p>
+                                </div>
+                            )}
                         </div>
                     </div>
-                    <div className="space-y-4">
-                        <h3 className="font-medium text-gray-900">Shipment Details</h3>
+                    <div className="space-y-6">
+                        <h3 className="font-semibold text-gray-900 text-lg">Shipment Details</h3>
                         <Input 
                             label="Cargo Description" 
                             value={cargoDetails.cargo} 
@@ -2238,23 +2503,34 @@ const ClientDashboardView = ({ drivers, requests, currentClient, onSendRequest, 
                 </div>
             </Section>
 
-            {/* Client Waybill Upload and Request Status Monitoring */}
-            <Section title="My Requests Status & Waybills (Step 7)">
+            {/* Client Waybill Upload */}
+            <Section 
+                title="My Requests Status & Waybills" 
+                description="Track your request status and upload required waybill documents"
+            >
                 <div className="space-y-4">
                     {requests.filter(r => r.clientId === currentClient.id).map(req => (
-                        <Card key={req.id} className="p-4 border border-gray-100">
+                        <Card key={req.id} className="hover:shadow-md transition-shadow duration-200">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h4 className="font-semibold text-gray-900">{req.cargo} (Req ID: {req.id.slice(0, 6)})</h4>
-                                    <p className="text-sm text-gray-600">Driver: {req.driverName} | Status: <Badge variant={getRequestStatusVariant(req.status)}>{req.status.toUpperCase().replace(/_/g, ' ')}</Badge></p>
+                                    <h4 className="font-semibold text-gray-900">
+                                      {req.cargo} (Req ID: {req.id.slice(0, 6)})
+                                    </h4>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                      Driver: {req.driverName} | Status: {' '}
+                                      <Badge variant={getRequestStatusVariant(req.status)}>
+                                        {req.status.toUpperCase().replace(/_/g, ' ')}
+                                      </Badge>
+                                    </p>
                                 </div>
                                 
                             </div>
-                            <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
-                                <p className="text-sm text-gray-700">Client Waybill Receipt (Step 7):</p>
+                            <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                                <p className="text-sm text-gray-700 font-medium">Client Waybill Receipt:</p>
                                 {req.clientWaybillUrl ? (
-                                    <a href={req.clientWaybillUrl} target="_blank" className="text-green-600 text-sm flex items-center space-x-1">
-                                        <CheckCircle className="w-4 h-4" /> <span>View Uploaded</span>
+                                    <a href={req.clientWaybillUrl} target="_blank" className="text-green-600 text-sm flex items-center space-x-2 transition-colors duration-200">
+                                        <CheckCircle className="w-4 h-4" /> 
+                                        <span>View Uploaded</span>
                                     </a>
                                 ) : (
                                     req.status === REQUEST_STATUSES.ACCEPTED ? (
@@ -2271,25 +2547,31 @@ const ClientDashboardView = ({ drivers, requests, currentClient, onSendRequest, 
                         </Card>
                     ))}
                 </div>
-                {requests.filter(r => r.clientId === currentClient.id).length === 0 && <p className="text-gray-500 text-center">No requests initiated yet.</p>}
+                {requests.filter(r => r.clientId === currentClient.id).length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                        <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                        <p>No requests initiated yet</p>
+                    </div>
+                )}
             </Section>
         </div>
     );
 };
 
-
-// --- CLIENT MANAGEMENT COMPONENT (Admin/Client View) -------------------------------
+// --- CLIENT MANAGEMENT COMPONENT ---
 const ClientManagement = ({ drivers, owners, requests, onSendRequest, onClientWaybillUpload, onSaveOwner, onDeleteOwner }) => {
-    // Simulating the current Client logged in 
     const currentClient = owners.find(o => o.id === SEED_OWNER_ID);
 
     if (!currentClient) return <div>Client not found.</div>;
 
     return (
-        <div className="space-y-6">
-            <Header title="Client Management (Admin/Client View)" />
+        <div className="space-y-8">
+            <Header 
+                title="Client Management" 
+                description="Admin and client views for managing client operations and shipments"
+            />
 
-            {/* --- SIMULATED CLIENT DASHBOARD --- */}
+            {/* Client Dashboard View */}
             <ClientDashboardView 
                 drivers={drivers}
                 requests={requests}
@@ -2298,19 +2580,22 @@ const ClientManagement = ({ drivers, owners, requests, onSendRequest, onClientWa
                 onClientWaybillUpload={onClientWaybillUpload}
                 owners={owners}
             />
-            {/* ---------------------------------- */}
             
             {/* Admin Table View */}
-            <Section title="All Clients (Admin View)">
-                <p className="text-gray-500">Admin table for all clients.</p>
+            <Section 
+                title="All Clients" 
+                description="Complete overview of all clients and their active shipments"
+            >
+                <div className="text-center py-8 text-gray-500">
+                    <Truck className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <p>Client management table view</p>
+                </div>
             </Section>
         </div>
     );
 };
 
-
-// --- APP COMPONENT (Updated with State and Handlers) ---------------------
-
+// --- APP COMPONENT ---
 const App = () => {
   const [currentTab, setCurrentTab] = useState("dashboard");
   const [drivers, setDrivers] = useState(seedDrivers);
@@ -2318,14 +2603,10 @@ const App = () => {
   const [tracks, setTracks] = useState(seedTracks);
   const [users, setUsers] = useState(seedUsers);
   const [messages, setMessages] = useState(seedMessages);
-
-  // NEW: Requests state
   const [requests, setRequests] = useState(seedRequests);
 
-  // Current user (for settings)
   const currentUser = users[0];
 
-  // --- STATS CALCULATION FUNCTION (New Implementation) ---
   const calculateStats = (drivers, tracks, requests, owners) => {
     const now = Date.now();
     const oneWeekAgo = now - 7 * 24 * 60 * 60 * 1000;
@@ -2346,7 +2627,6 @@ const App = () => {
     const requestsLastWeek = filterRequestsByTime(requests, oneWeekAgo);
     const requestsLastMonth = filterRequestsByTime(requests, oneMonthAgo);
     
-    // Statuses that count as "processed" (approved, rejected, or completed)
     const PROCESSED_STATUSES = [REQUEST_STATUSES.ACCEPTED, REQUEST_STATUSES.REJECTED, REQUEST_STATUSES.COMPLETED];
 
     const approvedRejectedLastWeek = requestsLastWeek.filter(req => 
@@ -2371,159 +2651,131 @@ const App = () => {
     };
   };
 
-  // --- MEMOIZED STATS (Updated) ---
   const stats = useMemo(() => calculateStats(drivers, tracks, requests, owners), [drivers, tracks, requests, owners]);
 
+  const handleSendRequest = (clientId, driverId, cargo, origin, destination) => {
+      const client = owners.find(o => o.id === clientId);
+      const driver = drivers.find(d => d.id === driverId);
 
-  // --- NEW WORKFLOW HANDLERS ---
+      if (!client || !driver) return false;
 
-    // 1. Client sends a request (Step 2)
-    const handleSendRequest = (clientId, driverId, cargo, origin, destination) => {
-        const client = owners.find(o => o.id === clientId);
-        const driver = drivers.find(d => d.id === driverId);
-
-        if (!client || !driver) return false;
-
-        const newRequest = {
-            id: generateId(),
-            clientId,
-            clientName: client.name,
-            driverId,
-            driverName: driver.name,
-            cargo,
-            origin,
-            destination,
-            status: REQUEST_STATUSES.PENDING,
-            createdAt: now(),
-            driverWaybillUrl: null,
-            clientWaybillUrl: null,
-            currentDriverStatus: 'pending_request',
-        };
-        setRequests(prev => [newRequest, ...prev]);
-
-        // Update driver status to pending request
-        setDrivers(prevDrivers => prevDrivers.map(d => 
-            d.id === driverId ? { ...d, status: 'pending_request' } : d
-        ));
-
-        return true;
-    };
-
-    /**
-     * @description Handles driver response (Approve, Reject, Accept, Complete)
-     * @param {string} requestId 
-     * @param {('approve'|'reject'|'accept'|'completed')} action 
-     */
-    const handleDriverResponse = (requestId, action) => {
-        setRequests(prevRequests => prevRequests.map(req => {
-            if (req.id === requestId) {
-                let newStatus = req.status;
-                const driverId = req.driverId;
-                const clientId = req.clientId;
-
-                if (action === 'approve') {
-                    // Step 3: Driver approves request
-                    newStatus = REQUEST_STATUSES.APPROVED_BY_DRIVER;
-                } else if (action === 'accept') {
-                    // Step 4 & 5: Driver accepts, triggers assignment
-                    newStatus = REQUEST_STATUSES.ACCEPTED;
-                    
-                    // Assign client to driver and set driver status to 'idle' (ready for loading)
-                    setDrivers(prevDrivers => prevDrivers.map(d =>
-                        d.id === driverId ? { ...d, assignedClientId: clientId, status: 'idle' } : d
-                    ));
-
-                    // Update owner's assigned drivers
-                    setOwners(prevOwners => prevOwners.map(o =>
-                        o.id === clientId ? { ...o, assignedDrivers: [...new Set([...o.assignedDrivers, driverId])] } : o
-                    ));
-                } else if (action === 'reject' || action === 'completed') {
-                    newStatus = action === 'reject' ? REQUEST_STATUSES.REJECTED : REQUEST_STATUSES.COMPLETED;
-
-                    // FIX/IMPROVEMENT: Ensure the driver's assignment is reset and status goes to idle.
-                    setDrivers(prevDrivers => prevDrivers.map(d =>
-                        d.id === driverId ? { ...d, assignedClientId: null, status: 'idle' } : d
-                    ));
-                    
-                    // Clean up owner's assigned drivers (optional, but good practice)
-                    setOwners(prevOwners => prevOwners.map(o =>
-                        o.id === clientId ? { ...o, assignedDrivers: o.assignedDrivers.filter(id => id !== driverId) } : o
-                    ));
-                }
-
-                return { ...req, status: newStatus };
-            }
-            return req;
-        }));
-    };
-
-    // 3. Driver changes status and uploads waybill (Steps 6 & 8)
-    const handleDriverStatusUpdate = (driverId, newStatus, waybillFile) => {
-        // Step 8: Update driver status
-        setDrivers(prevDrivers => {
-            const updatedDrivers = prevDrivers.map(d => 
-                d.id === driverId ? { ...d, status: newStatus } : d
-            );
-            return updatedDrivers;
-        });
-
-        // Step 6: Driver waybill upload (only applies to the active, accepted request)
-        setRequests(prevRequests => {
-            const activeRequest = prevRequests.find(req => 
-                req.driverId === driverId && req.status === REQUEST_STATUSES.ACCEPTED
-            );
-            
-            if (activeRequest) {
-                // If status is 'loading' and a file is provided, simulate upload
-                const driverWaybillUrl = (newStatus === 'loading' && waybillFile) 
-                    ? `/driver/${driverId}/${waybillFile.name}` // Simulate file URL
-                    : activeRequest.driverWaybillUrl; // Keep existing URL if not loading/uploading
-
-                return prevRequests.map(req => 
-                    req.id === activeRequest.id ? 
-                    { ...req, driverWaybillUrl, currentDriverStatus: newStatus } : 
-                    req
-                );
-            }
-            
-            // If no active request, only update driver status
-            return prevRequests.map(req => 
-                req.driverId === driverId ? 
-                { ...req, currentDriverStatus: newStatus } : req
-            );
-        });
-    };
-
-    // 4. Client uploads waybill (Step 7)
-    const handleClientWaybillUpload = (requestId, waybillFile) => {
-        const waybillUrl = `/client/${requestId}/${waybillFile.name}`; // Simulate file URL
-        setRequests(prevRequests => prevRequests.map(req => 
-            req.id === requestId ? { ...req, clientWaybillUrl: waybillUrl } : req
-        ));
-    };
-
-    // 5. Handle sending messages
-    const handleSendMessage = (messageData) => {
-      const newMessage = {
-        id: generateId(),
-        ...messageData,
-        timestamp: new Date().toISOString(),
+      const newRequest = {
+          id: generateId(),
+          clientId,
+          clientName: client.name,
+          driverId,
+          driverName: driver.name,
+          cargo,
+          origin,
+          destination,
+          status: REQUEST_STATUSES.PENDING,
+          createdAt: now(),
+          driverWaybillUrl: null,
+          clientWaybillUrl: null,
+          currentDriverStatus: 'pending_request',
       };
-      setMessages(prev => [...prev, newMessage]);
-    };
+      setRequests(prev => [newRequest, ...prev]);
 
-  // --- UPDATED HANDLERS FOR USER MANAGEMENT ---
+      setDrivers(prevDrivers => prevDrivers.map(d => 
+          d.id === driverId ? { ...d, status: 'pending_request' } : d
+      ));
+
+      return true;
+  };
+
+  const handleDriverResponse = (requestId, action) => {
+      setRequests(prevRequests => prevRequests.map(req => {
+          if (req.id === requestId) {
+              let newStatus = req.status;
+              const driverId = req.driverId;
+              const clientId = req.clientId;
+
+              if (action === 'approve') {
+                  newStatus = REQUEST_STATUSES.APPROVED_BY_DRIVER;
+              } else if (action === 'accept') {
+                  newStatus = REQUEST_STATUSES.ACCEPTED;
+                  
+                  setDrivers(prevDrivers => prevDrivers.map(d =>
+                      d.id === driverId ? { ...d, assignedClientId: clientId, status: 'idle' } : d
+                  ));
+
+                  setOwners(prevOwners => prevOwners.map(o =>
+                      o.id === clientId ? { ...o, assignedDrivers: [...new Set([...o.assignedDrivers, driverId])] } : o
+                  ));
+              } else if (action === 'reject' || action === 'completed') {
+                  newStatus = action === 'reject' ? REQUEST_STATUSES.REJECTED : REQUEST_STATUSES.COMPLETED;
+
+                  setDrivers(prevDrivers => prevDrivers.map(d =>
+                      d.id === driverId ? { ...d, assignedClientId: null, status: 'idle' } : d
+                  ));
+                  
+                  setOwners(prevOwners => prevOwners.map(o =>
+                      o.id === clientId ? { ...o, assignedDrivers: o.assignedDrivers.filter(id => id !== driverId) } : o
+                  ));
+              }
+
+              return { ...req, status: newStatus };
+          }
+          return req;
+      }));
+  };
+
+  const handleDriverStatusUpdate = (driverId, newStatus, waybillFile) => {
+      setDrivers(prevDrivers => {
+          const updatedDrivers = prevDrivers.map(d => 
+              d.id === driverId ? { ...d, status: newStatus } : d
+          );
+          return updatedDrivers;
+      });
+
+      setRequests(prevRequests => {
+          const activeRequest = prevRequests.find(req => 
+              req.driverId === driverId && req.status === REQUEST_STATUSES.ACCEPTED
+          );
+          
+          if (activeRequest) {
+              const driverWaybillUrl = (newStatus === 'loading' && waybillFile) 
+                  ? `/driver/${driverId}/${waybillFile.name}`
+                  : activeRequest.driverWaybillUrl;
+
+              return prevRequests.map(req => 
+                  req.id === activeRequest.id ? 
+                  { ...req, driverWaybillUrl, currentDriverStatus: newStatus } : 
+                  req
+              );
+          }
+          
+          return prevRequests.map(req => 
+              req.driverId === driverId ? 
+              { ...req, currentDriverStatus: newStatus } : req
+          );
+      });
+  };
+
+  const handleClientWaybillUpload = (requestId, waybillFile) => {
+      const waybillUrl = `/client/${requestId}/${waybillFile.name}`;
+      setRequests(prevRequests => prevRequests.map(req => 
+          req.id === requestId ? { ...req, clientWaybillUrl: waybillUrl } : req
+      ));
+  };
+
+  const handleSendMessage = (messageData) => {
+    const newMessage = {
+      id: generateId(),
+      ...messageData,
+      timestamp: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, newMessage]);
+  };
+
   const handleSaveUser = (userData) => {
     if (userData.id) {
-      // Update existing user
       setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData } : u));
       
-      // If it's a driver, also update the drivers array
       if (userData.role === 'driver') {
         setDrivers(prev => prev.map(d => d.id === userData.id ? { ...d, ...userData } : d));
       }
     } else {
-      // Create new user
       const newUser = {
         ...userData,
         id: generateId(),
@@ -2532,7 +2784,6 @@ const App = () => {
       };
       setUsers(prev => [...prev, newUser]);
       
-      // If it's a driver, also create a driver record
       if (userData.role === 'driver') {
         const newDriver = {
           ...newUser,
@@ -2563,7 +2814,6 @@ const App = () => {
     }
   };
 
-  // --- STUB HANDLERS FOR OTHER COMPONENTS ---
   const handleSaveOwner = () => alert("Owner save not implemented.");
   const handleDeleteOwner = () => alert("Owner delete not implemented.");
   const handleAssignDriver = () => alert("Assign driver not implemented.");
@@ -2639,12 +2889,12 @@ const App = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Sidebar currentTab={currentTab} setTab={setCurrentTab} />
       
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 flex flex-col overflow-hidden ml-64">
+        <main className="flex-1 overflow-y-auto p-8">
           {renderContent()}
         </main>
       </div>
