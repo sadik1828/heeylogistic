@@ -33,12 +33,7 @@ import {
   TrendingUp,
   Package,
   Send,
-  Paperclip,
-  Eye,
-  EyeOff,
-  UserPlus,
-  Save,
-  Camera
+  Paperclip
 } from "lucide-react";
 
 // --- BOILERPLATE/HELPER COMPONENTS (Added/Completed for error prevention) ---
@@ -558,894 +553,9 @@ const Messages = ({ messages = [], onSendMessage, drivers = [], owners = [] }) =
   );
 };
 
-// --- UPDATED DOCUMENTS COMPONENT ---
-const Documents = ({ requests }) => {
-  // Filter requests that have waybills
-  const waybillRequests = requests.filter(req => 
-    req.driverWaybillUrl || req.clientWaybillUrl
-  );
-
-  return (
-    <div className="space-y-6">
-      <Header title="Document Management" />
-      
-      <Section title="Waybill Documents">
-        {waybillRequests.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-            <p>No waybill documents available</p>
-            <p className="text-sm">Waybills will appear here once uploaded by drivers and clients</p>
-          </div>
-        ) : (
-          <div className="overflow-hidden rounded-lg border border-gray-200">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Request ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cargo</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver Waybill</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client Waybill</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {waybillRequests.map(request => (
-                  <tr key={request.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {request.id.slice(0, 8)}...
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {request.cargo}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {request.driverName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {request.driverWaybillUrl ? (
-                        <a 
-                          href={request.driverWaybillUrl} 
-                          target="_blank" 
-                          className="text-blue-600 hover:text-blue-800 flex items-center space-x-1"
-                        >
-                          <FileText className="w-4 h-4" />
-                          <span>View Waybill</span>
-                        </a>
-                      ) : (
-                        <span className="text-gray-400">Not uploaded</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {request.clientName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {request.clientWaybillUrl ? (
-                        <a 
-                          href={request.clientWaybillUrl} 
-                          target="_blank" 
-                          className="text-blue-600 hover:text-blue-800 flex items-center space-x-1"
-                        >
-                          <FileText className="w-4 h-4" />
-                          <span>View Waybill</span>
-                        </a>
-                      ) : (
-                        <span className="text-gray-400">Not uploaded</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Section>
-    </div>
-  );
-};
-
-// --- UPDATED USER MANAGEMENT COMPONENT ---
-const UserManagement = ({ users, drivers, onSaveUser, onDeleteUser, onSaveDriver }) => {
-  const [activeTab, setActiveTab] = useState('users');
-  const [editingUser, setEditingUser] = useState(null);
-  const [editingDriver, setEditingDriver] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
-
-  const userRoles = [
-    { value: 'user', label: 'User' },
-    { value: 'admin', label: 'Admin' },
-    { value: 'driver', label: 'Driver' },
-    { value: 'client', label: 'Client' }
-  ];
-
-  const handleSaveUser = (userData) => {
-    onSaveUser(userData);
-    setEditingUser(null);
-  };
-
-  const handleSaveDriverDetails = (driverData) => {
-    onSaveDriver(driverData);
-    setEditingDriver(null);
-  };
-
-  const UserForm = ({ user, onSave, onCancel }) => {
-    const [formData, setFormData] = useState(user || {
-      name: '',
-      telephone: '',
-      email: '',
-      role: 'user',
-      password: '',
-      photoUrl: null,
-      isActive: true
-    });
-
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      onSave(formData);
-    };
-
-    return (
-      <Card className="p-6 mb-6">
-        <h3 className="font-semibold text-gray-900 mb-4">
-          {user ? 'Edit User' : 'Create New User'}
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Full Name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-            />
-            <Input
-              label="Telephone"
-              type="tel"
-              value={formData.telephone}
-              onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
-              required
-            />
-            <Input
-              label="Email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-            />
-            <Select
-              label="Role"
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-              options={userRoles}
-            />
-            <div className="relative">
-              <Input
-                label="Password"
-                type={showPassword ? "text" : "password"}
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                required={!user}
-              />
-              <button
-                type="button"
-                className="absolute right-3 top-8 text-gray-500"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            <FileUpload
-              label="Profile Photo"
-              onFileChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (e) => {
-                    setFormData({ ...formData, photoUrl: e.target.result });
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-            />
-          </div>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isActive"
-              checked={formData.isActive}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="isActive" className="ml-2 text-sm text-gray-700">
-              Active Account
-            </label>
-          </div>
-          <div className="flex justify-end space-x-3 pt-4">
-            <Button type="button" variant="secondary" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              {user ? 'Update User' : 'Create User'}
-            </Button>
-          </div>
-        </form>
-      </Card>
-    );
-  };
-
-  const DriverDetailsForm = ({ driver, onSave, onCancel }) => {
-    const [formData, setFormData] = useState(driver || {
-      driverLicenseUrl: null,
-      truckNumber: '',
-      carOwnerName: '',
-      carOwnerTelephone: ''
-    });
-
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      onSave(formData);
-    };
-
-    return (
-      <Card className="p-6 mb-6">
-        <h3 className="font-semibold text-gray-900 mb-4">
-          {driver ? 'Edit Driver Details' : 'Add Driver Details'}
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FileUpload
-              label="Driver License"
-              onFileChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = (e) => {
-                    setFormData({ ...formData, driverLicenseUrl: e.target.result });
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
-            />
-            <Input
-              label="Truck Number"
-              value={formData.truckNumber}
-              onChange={(e) => setFormData({ ...formData, truckNumber: e.target.value })}
-              placeholder="e.g., SL-TRK-9921"
-            />
-            <Input
-              label="Car Owner Name"
-              value={formData.carOwnerName}
-              onChange={(e) => setFormData({ ...formData, carOwnerName: e.target.value })}
-            />
-            <Input
-              label="Car Owner Telephone"
-              type="tel"
-              value={formData.carOwnerTelephone}
-              onChange={(e) => setFormData({ ...formData, carOwnerTelephone: e.target.value })}
-            />
-          </div>
-          <div className="flex justify-end space-x-3 pt-4">
-            <Button type="button" variant="secondary" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              {driver ? 'Update Details' : 'Save Details'}
-            </Button>
-          </div>
-        </form>
-      </Card>
-    );
-  };
-
-  return (
-    <div className="space-y-6">
-      <Header 
-        title="User Management" 
-        actions={
-          <Button onClick={() => setEditingUser({})}>
-            <UserPlus className="w-4 h-4 mr-2" />
-            Add New User
-          </Button>
-        } 
-      />
-
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'users'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            User Accounts
-          </button>
-          <button
-            onClick={() => setActiveTab('drivers')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'drivers'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Driver Management
-          </button>
-        </nav>
-      </div>
-
-      {/* User Accounts Tab */}
-      {activeTab === 'users' && (
-        <>
-          {editingUser && (
-            <UserForm
-              user={editingUser}
-              onSave={handleSaveUser}
-              onCancel={() => setEditingUser(null)}
-            />
-          )}
-
-          <Section title="All Users">
-            <div className="overflow-hidden rounded-lg border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map(user => (
-                    <tr key={user.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <img
-                            src={user.photoUrl || '/api/placeholder/40/40'}
-                            alt={user.name}
-                            className="w-10 h-10 rounded-full mr-3"
-                          />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                            <div className="text-sm text-gray-500">{user.username}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div>{user.telephone}</div>
-                        <div className="text-gray-500">{user.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant={
-                          user.role === 'admin' ? 'primary' :
-                          user.role === 'driver' ? 'secondary' :
-                          user.role === 'client' ? 'warning' : 'default'
-                        }>
-                          {user.role.toUpperCase()}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <Badge variant={user.isActive ? 'success' : 'error'}>
-                          {user.isActive ? 'ACTIVE' : 'DISABLED'}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center space-x-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            onClick={() => setEditingUser(user)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="error"
-                            onClick={() => onDeleteUser(user.id)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Section>
-        </>
-      )}
-
-      {/* Driver Management Tab */}
-      {activeTab === 'drivers' && (
-        <>
-          {editingDriver && (
-            <DriverDetailsForm
-              driver={editingDriver}
-              onSave={handleSaveDriverDetails}
-              onCancel={() => setEditingDriver(null)}
-            />
-          )}
-
-          <Section title="Driver Details Management">
-            <div className="overflow-hidden rounded-lg border border-gray-200">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Truck Number</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car Owner</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver License</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {drivers.map(driver => (
-                    <tr key={driver.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <img
-                            src={driver.photoUrl}
-                            alt={driver.name}
-                            className="w-10 h-10 rounded-full mr-3 object-cover"
-                          />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{driver.name}</div>
-                            <div className="text-sm text-gray-500">{driver.telephone}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {driver.truckNumber || 'Not assigned'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div>{driver.carOwnerName || 'N/A'}</div>
-                        <div className="text-gray-500">{driver.carOwnerTelephone || ''}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        {driver.driverLicenseUrl ? (
-                          <a
-                            href={driver.driverLicenseUrl}
-                            target="_blank"
-                            className="text-blue-600 hover:text-blue-800 flex items-center space-x-1"
-                          >
-                            <FileText className="w-4 h-4" />
-                            <span>View License</span>
-                          </a>
-                        ) : (
-                          <span className="text-gray-400">Not uploaded</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          onClick={() => setEditingDriver(driver)}
-                        >
-                          <Edit className="w-4 h-4 mr-1" />
-                          Edit Details
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Section>
-        </>
-      )}
-    </div>
-  );
-};
-
-// --- UPDATED SETTINGS COMPONENT WITH USER PROFILE EDITING ---
-const Settings = ({ currentUser, onSaveUser }) => {
-  const [activeTab, setActiveTab] = useState('profile');
-  const [userData, setUserData] = useState(currentUser);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  const handleSave = (e) => {
-    e.preventDefault();
-    onSaveUser(userData);
-    setIsEditing(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
-  };
-
-  const handleCancel = () => {
-    setUserData(currentUser);
-    setIsEditing(false);
-  };
-
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setUserData({ ...userData, photoUrl: e.target.result });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  return (
-    <div className="space-y-6">
-      <Header title="Settings & Profile" />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar Navigation */}
-        <div className="lg:col-span-1">
-          <Card className="p-4">
-            <nav className="space-y-2">
-              <button
-                onClick={() => setActiveTab('profile')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === 'profile'
-                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Profile Settings
-              </button>
-              <button
-                onClick={() => setActiveTab('security')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === 'security'
-                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Security
-              </button>
-              <button
-                onClick={() => setActiveTab('preferences')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === 'preferences'
-                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Preferences
-              </button>
-              <button
-                onClick={() => setActiveTab('notifications')}
-                className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeTab === 'notifications'
-                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                Notifications
-              </button>
-            </nav>
-          </Card>
-        </div>
-
-        {/* Main Content */}
-        <div className="lg:col-span-3">
-          {activeTab === 'profile' && (
-            <Section title="Profile Settings">
-              {saved && (
-                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center">
-                  <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-                  <span className="text-green-700 text-sm">Profile updated successfully!</span>
-                </div>
-              )}
-              
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Profile Photo */}
-                <div className="flex-shrink-0">
-                  <div className="relative">
-                    <img
-                      src={userData.photoUrl || '/api/placeholder/150/150'}
-                      alt={userData.name}
-                      className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
-                    />
-                    {isEditing && (
-                      <label className="absolute bottom-2 right-2 bg-blue-600 text-white p-2 rounded-full cursor-pointer shadow-lg hover:bg-blue-700 transition-colors">
-                        <Camera className="w-4 h-4" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handlePhotoChange}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
-                  </div>
-                </div>
-
-                {/* Profile Form */}
-                <div className="flex-1">
-                  <form onSubmit={handleSave} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Input
-                        label="Full Name"
-                        value={userData.name}
-                        onChange={(e) => setUserData({ ...userData, name: e.target.value })}
-                        disabled={!isEditing}
-                        required
-                      />
-                      <Input
-                        label="Username"
-                        value={userData.username}
-                        onChange={(e) => setUserData({ ...userData, username: e.target.value })}
-                        disabled={!isEditing}
-                        required
-                      />
-                      <Input
-                        label="Email"
-                        type="email"
-                        value={userData.email}
-                        onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-                        disabled={!isEditing}
-                        required
-                      />
-                      <Input
-                        label="Telephone"
-                        type="tel"
-                        value={userData.telephone}
-                        onChange={(e) => setUserData({ ...userData, telephone: e.target.value })}
-                        disabled={!isEditing}
-                        required
-                      />
-                    </div>
-
-                    {isEditing && (
-                      <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                        <Button type="button" variant="secondary" onClick={handleCancel}>
-                          Cancel
-                        </Button>
-                        <Button type="submit">
-                          <Save className="w-4 h-4 mr-2" />
-                          Save Changes
-                        </Button>
-                      </div>
-                    )}
-                  </form>
-
-                  {!isEditing && (
-                    <div className="flex justify-end pt-4 border-t border-gray-200">
-                      <Button onClick={() => setIsEditing(true)}>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit Profile
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Section>
-          )}
-
-          {activeTab === 'security' && (
-            <Section title="Security Settings">
-              <form onSubmit={handleSave} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="relative">
-                    <Input
-                      label="Current Password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter current password"
-                      disabled={!isEditing}
-                    />
-                  </div>
-                  <div className="relative">
-                    <Input
-                      label="New Password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter new password"
-                      disabled={!isEditing}
-                    />
-                  </div>
-                </div>
-                
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="showPassword"
-                    checked={showPassword}
-                    onChange={(e) => setShowPassword(e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <label htmlFor="showPassword" className="ml-2 text-sm text-gray-700">
-                    Show passwords
-                  </label>
-                </div>
-
-                {isEditing && (
-                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                    <Button type="button" variant="secondary" onClick={handleCancel}>
-                      Cancel
-                    </Button>
-                    <Button type="submit">
-                      <Save className="w-4 h-4 mr-2" />
-                      Update Password
-                    </Button>
-                  </div>
-                )}
-              </form>
-
-              {!isEditing && (
-                <div className="flex justify-end pt-4 border-t border-gray-200">
-                  <Button onClick={() => setIsEditing(true)}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Change Password
-                  </Button>
-                </div>
-              )}
-
-              {/* Security Status */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-3">Security Status</h4>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Last password change</span>
-                    <span className="text-sm text-gray-900">2 months ago</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Two-factor authentication</span>
-                    <Badge variant="error">Disabled</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Login activity</span>
-                    <span className="text-sm text-gray-900">Active now</span>
-                  </div>
-                </div>
-              </div>
-            </Section>
-          )}
-
-          {activeTab === 'preferences' && (
-            <Section title="Preferences">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
-                  <Select
-                    options={[
-                      { value: 'en', label: 'English' },
-                      { value: 'so', label: 'Somali' },
-                      { value: 'ar', label: 'Arabic' }
-                    ]}
-                    disabled={!isEditing}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
-                  <Select
-                    options={[
-                      { value: 'east-africa', label: 'East Africa Time (EAT)' },
-                      { value: 'utc', label: 'UTC' }
-                    ]}
-                    disabled={!isEditing}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Email Preferences</label>
-                  <div className="space-y-2">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="emailNotifications"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        disabled={!isEditing}
-                      />
-                      <label htmlFor="emailNotifications" className="ml-2 text-sm text-gray-700">
-                        Receive email notifications
-                      </label>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="marketingEmails"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        disabled={!isEditing}
-                      />
-                      <label htmlFor="marketingEmails" className="ml-2 text-sm text-gray-700">
-                        Receive marketing emails
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {isEditing && (
-                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                    <Button type="button" variant="secondary" onClick={handleCancel}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleSave}>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Preferences
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {!isEditing && (
-                <div className="flex justify-end pt-4 border-t border-gray-200">
-                  <Button onClick={() => setIsEditing(true)}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Preferences
-                  </Button>
-                </div>
-              )}
-            </Section>
-          )}
-
-          {activeTab === 'notifications' && (
-            <Section title="Notification Settings">
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-3">Push Notifications</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">New Requests</p>
-                        <p className="text-sm text-gray-600">Get notified when new shipment requests arrive</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        disabled={!isEditing}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">Driver Updates</p>
-                        <p className="text-sm text-gray-600">Notifications about driver status changes</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        disabled={!isEditing}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">Messages</p>
-                        <p className="text-sm text-gray-600">Notifications for new messages</p>
-                      </div>
-                      <input
-                        type="checkbox"
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        disabled={!isEditing}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {isEditing && (
-                  <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                    <Button type="button" variant="secondary" onClick={handleCancel}>
-                      Cancel
-                    </Button>
-                    <Button onClick={handleSave}>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Settings
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {!isEditing && (
-                <div className="flex justify-end pt-4 border-t border-gray-200">
-                  <Button onClick={() => setIsEditing(true)}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Notifications
-                  </Button>
-                </div>
-              )}
-            </Section>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+const Documents = () => <Section title="Documents"><p className="text-gray-500">Document management here...</p></Section>;
+const UserManagement = () => <Section title="User Management"><p className="text-gray-500">User accounts here...</p></Section>;
+const Settings = () => <Section title="Settings"><p className="text-gray-500">Application settings here...</p></Section>;
 
 // --- DATA STRUCTURES ----------------------------------------------------
 const now = () => new Date().toISOString();
@@ -1481,8 +591,7 @@ const seedDrivers = [
     id: SEED_DRIVER_ID,
     name: "Ahmed Ali",
     address: "Hargeisa, Togdheer Rd",
-    telephone: "+25263 555 1122",
-    email: "ahmed.ali@example.com",
+    phone: "+25263 555 1122",
     status: "idle",
     truckNumber: "SL-TRK-9921",
     photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
@@ -1490,17 +599,13 @@ const seedDrivers = [
     assignedClientId: null,
     identityVerified: true,
     currentLocation: { lat: 9.5616, lng: 44.0650 },
-    routeProgress: 0,
-    driverLicenseUrl: null,
-    carOwnerName: "Mohamed Ali",
-    carOwnerTelephone: "+25263 555 1123"
+    routeProgress: 0
   },
   {
     id: "d2",
     name: "Hodan Warsame",
     address: "Berbera Port Area",
-    telephone: "+25263 777 9010",
-    email: "hodan.warsame@example.com",
+    phone: "+25263 777 9010",
     status: "idle",
     truckNumber: "SL-TRK-4410",
     photoUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
@@ -1508,10 +613,7 @@ const seedDrivers = [
     assignedClientId: null,
     identityVerified: true,
     currentLocation: { lat: 10.4340, lng: 45.0140 },
-    routeProgress: 0,
-    driverLicenseUrl: null,
-    carOwnerName: "Hodan Transport Co.",
-    carOwnerTelephone: "+25263 777 9011"
+    routeProgress: 0
   },
 ];
 
@@ -1520,7 +622,7 @@ const seedOwners = [
     id: SEED_OWNER_ID, 
     name: "Abdi Buyer Co.", 
     location: "Hargeisa Market", 
-    telephone: "+25263 600 1010", 
+    phone: "+25263 600 1010", 
     email: "abdi@buyerco.com",
     contactPerson: "Abdi Hassan",
     assignedDrivers: [],
@@ -1530,7 +632,7 @@ const seedOwners = [
     id: "o2", 
     name: "Zahra Import Export", 
     location: "Borama Trade Center", 
-    telephone: "+25263 600 2020", 
+    phone: "+25263 600 2020", 
     email: "info@zahraimport.com",
     contactPerson: "Zahra Mohamed",
     assignedDrivers: [],
@@ -1562,54 +664,9 @@ const seedRequests = [
 ];
 
 const seedUsers = [
-    { 
-      id: 'u1', 
-      username: 'admin', 
-      password: 'password123', 
-      role: 'admin', 
-      name: 'System Administrator', 
-      telephone: '+25263 000 0001',
-      email: 'admin@heeylogistics.com',
-      photoUrl: null,
-      isActive: true,
-      permissions: ['all'] 
-    },
-    { 
-      id: 'u2', 
-      username: 'ahmed_ali', 
-      password: 'driver123', 
-      role: 'driver', 
-      name: 'Ahmed Ali', 
-      telephone: '+25263 555 1122',
-      email: 'ahmed.ali@example.com',
-      photoUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-      isActive: true,
-      permissions: [] 
-    },
-    { 
-      id: 'u3', 
-      username: 'abdi_buyer', 
-      password: 'owner123', 
-      role: 'client', 
-      name: 'Abdi Hassan', 
-      telephone: '+25263 600 1010',
-      email: 'abdi@buyerco.com',
-      photoUrl: null,
-      isActive: true,
-      permissions: [] 
-    },
-    { 
-      id: 'u4', 
-      username: 'hodan_warsame', 
-      password: 'driver123', 
-      role: 'driver', 
-      name: 'Hodan Warsame', 
-      telephone: '+25263 777 9010',
-      email: 'hodan.warsame@example.com',
-      photoUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face',
-      isActive: true,
-      permissions: [] 
-    },
+    { id: 'u1', username: 'admin', password: 'password123', role: 'admin', name: 'System Administrator', permissions: ['all'] },
+    { id: 'u2', username: 'ahmed_ali', password: 'driver123', role: 'driver', name: 'Ahmed Ali', permissions: [] },
+    { id: 'u3', username: 'abdi_buyer', password: 'owner123', role: 'owner', name: 'Abdi Hassan', permissions: [] },
 ];
 
 // Seed messages for the messaging system
@@ -2048,8 +1105,12 @@ const DriverManagement = ({ drivers, requests, onDriverStatusUpdate, onDriverRes
 
     return (
         <div className="space-y-6">
-            {/* REMOVED: Add New Driver button from Header */}
-            <Header title="Driver Management (Admin/Driver View)" />
+            {/* Admin Header and Add Driver button */}
+            <Header title="Driver Management (Admin/Driver View)" actions={
+                <Button onClick={() => setIsFormOpen(true)}>
+                    <Plus className="w-4 h-4 mr-2" /> Add New Driver
+                </Button>
+            } />
 
             {/* --- SIMULATED DRIVER DASHBOARD --- */}
             <DriverDashboardView 
@@ -2083,13 +1144,13 @@ const DriverManagement = ({ drivers, requests, onDriverStatusUpdate, onDriverRes
                                             <img src={driver.photoUrl} alt={driver.name} className="h-10 w-10 rounded-full mr-4 object-cover" />
                                             <div>
                                                 <div className="text-sm font-medium text-gray-900">{driver.name}</div>
-                                                <div className="text-sm text-gray-500">{driver.telephone}</div>
+                                                <div className="text-sm text-gray-500">{driver.phone}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <p>{driver.truckNumber}</p>
-                                        <p className="text-xs text-gray-500">{driver.carOwnerName || 'N/A'}</p>
+                                        <p className="text-xs text-gray-500">{driver.co_name || 'N/A'}</p>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
                                         <Badge variant={getStatusColor(driver.status)}>{driver.status.toUpperCase().replace(/_/g, ' ')}</Badge>
@@ -2322,9 +1383,6 @@ const App = () => {
   // NEW: Requests state
   const [requests, setRequests] = useState(seedRequests);
 
-  // Current user (for settings)
-  const currentUser = users[0];
-
   // --- STATS CALCULATION FUNCTION (New Implementation) ---
   const calculateStats = (drivers, tracks, requests, owners) => {
     const now = Date.now();
@@ -2512,58 +1570,10 @@ const App = () => {
       setMessages(prev => [...prev, newMessage]);
     };
 
-  // --- UPDATED HANDLERS FOR USER MANAGEMENT ---
-  const handleSaveUser = (userData) => {
-    if (userData.id) {
-      // Update existing user
-      setUsers(prev => prev.map(u => u.id === userData.id ? { ...u, ...userData } : u));
-      
-      // If it's a driver, also update the drivers array
-      if (userData.role === 'driver') {
-        setDrivers(prev => prev.map(d => d.id === userData.id ? { ...d, ...userData } : d));
-      }
-    } else {
-      // Create new user
-      const newUser = {
-        ...userData,
-        id: generateId(),
-        username: userData.email.split('@')[0],
-        permissions: []
-      };
-      setUsers(prev => [...prev, newUser]);
-      
-      // If it's a driver, also create a driver record
-      if (userData.role === 'driver') {
-        const newDriver = {
-          ...newUser,
-          status: 'idle',
-          rating: 0,
-          assignedClientId: null,
-          identityVerified: false,
-          currentLocation: { lat: 0, lng: 0 },
-          routeProgress: 0,
-          driverLicenseUrl: null,
-          truckNumber: '',
-          carOwnerName: '',
-          carOwnerTelephone: ''
-        };
-        setDrivers(prev => [...prev, newDriver]);
-      }
-    }
-  };
-
-  const handleDeleteUser = (userId) => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
-    setDrivers(prev => prev.filter(d => d.id !== userId));
-  };
-
-  const handleSaveDriver = (driverData) => {
-    if (driverData.id) {
-      setDrivers(prev => prev.map(d => d.id === driverData.id ? { ...d, ...driverData } : d));
-    }
-  };
-
   // --- STUB HANDLERS FOR OTHER COMPONENTS ---
+  const handleSaveDriver = () => alert("Driver save not implemented.");
+  const handleDeleteDriver = () => alert("Driver delete not implemented.");
+  const handleUpdateStatus = () => alert("Admin status update not implemented.");
   const handleSaveOwner = () => alert("Owner save not implemented.");
   const handleDeleteOwner = () => alert("Owner delete not implemented.");
   const handleAssignDriver = () => alert("Assign driver not implemented.");
@@ -2571,6 +1581,8 @@ const App = () => {
   const handleRateDriver = () => alert("Rate driver not implemented.");
   const handleMarkArrived = () => alert("Mark arrived not implemented.");
   const handleAssignDriverToTrack = () => alert("Assign driver to track not implemented.");
+  const handleSaveUser = () => alert("Save user not implemented.");
+  const handleDeleteUser = () => alert("Delete user not implemented.");
   const handleUpdateAvailability = () => alert("Update availability not implemented."); 
   
   const renderContent = () => {
@@ -2591,7 +1603,8 @@ const App = () => {
           drivers={drivers}
           requests={requests}
           onSaveDriver={handleSaveDriver}
-          onDeleteDriver={handleDeleteUser}
+          onDeleteDriver={handleDeleteDriver}
+          onUpdateStatus={handleUpdateStatus} 
           onDriverStatusUpdate={handleDriverStatusUpdate} 
           onDriverResponse={handleDriverResponse} 
         />;
@@ -2622,17 +1635,11 @@ const App = () => {
           owners={owners} 
         />;
       case "documents":
-        return <Documents requests={requests} />;
+        return <Documents drivers={drivers} owners={owners} />;
       case "user-management":
-        return <UserManagement 
-          users={users} 
-          drivers={drivers}
-          onSaveUser={handleSaveUser} 
-          onDeleteUser={handleDeleteUser}
-          onSaveDriver={handleSaveDriver}
-        />;
+        return <UserManagement users={users} onSaveUser={handleSaveUser} onDeleteUser={handleDeleteUser} />;
       case "settings":
-        return <Settings currentUser={currentUser} onSaveUser={handleSaveUser} />;
+        return <Settings />;
       default:
         return <Dashboard stats={stats} drivers={drivers} />;
     }
