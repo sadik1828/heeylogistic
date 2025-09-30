@@ -38,7 +38,10 @@ import {
   EyeOff,
   UserPlus,
   Save,
-  Camera
+  Camera,
+  History,
+  Calendar,
+  Activity
 } from "lucide-react";
 
 // --- BOILERPLATE/HELPER COMPONENTS ---
@@ -163,6 +166,234 @@ const RatingStars = ({ rating }) => (
     <span className="ml-2 text-sm text-gray-600">({rating})</span>
   </div>
 );
+
+// --- SEARCH COMPONENT ---
+const SearchBar = ({ value, onChange, placeholder = "Search across all modules..." }) => (
+  <div className="relative">
+    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <Search className="h-5 w-5 text-gray-400" />
+    </div>
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors duration-200"
+      placeholder={placeholder}
+    />
+  </div>
+);
+
+// --- ACTIVITY LOG COMPONENT ---
+const ActivityLog = ({ activities, searchQuery = "" }) => {
+  const [filter, setFilter] = useState("all");
+  const [dateRange, setDateRange] = useState("all");
+
+  const filteredActivities = useMemo(() => {
+    let filtered = activities;
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(activity => 
+        activity.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        activity.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        activity.module.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        activity.details.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Apply type filter
+    if (filter !== "all") {
+      filtered = filtered.filter(activity => activity.type === filter);
+    }
+
+    // Apply date range filter
+    if (dateRange !== "all") {
+      const now = new Date();
+      let startDate = new Date();
+
+      switch (dateRange) {
+        case "today":
+          startDate.setHours(0, 0, 0, 0);
+          break;
+        case "week":
+          startDate.setDate(now.getDate() - 7);
+          break;
+        case "month":
+          startDate.setMonth(now.getMonth() - 1);
+          break;
+        default:
+          break;
+      }
+
+      filtered = filtered.filter(activity => new Date(activity.timestamp) >= startDate);
+    }
+
+    return filtered;
+  }, [activities, searchQuery, filter, dateRange]);
+
+  const getActivityIcon = (type) => {
+    switch (type) {
+      case 'user': return <User className="w-4 h-4" />;
+      case 'driver': return <User className="w-4 h-4" />;
+      case 'request': return <FileText className="w-4 h-4" />;
+      case 'message': return <MessageCircle className="w-4 h-4" />;
+      case 'document': return <FileText className="w-4 h-4" />;
+      case 'system': return <SettingsIcon className="w-4 h-4" />;
+      default: return <Activity className="w-4 h-4" />;
+    }
+  };
+
+  const getActivityColor = (type) => {
+    switch (type) {
+      case 'user': return 'text-blue-600 bg-blue-50';
+      case 'driver': return 'text-green-600 bg-green-50';
+      case 'request': return 'text-purple-600 bg-purple-50';
+      case 'message': return 'text-yellow-600 bg-yellow-50';
+      case 'document': return 'text-indigo-600 bg-indigo-50';
+      case 'system': return 'text-gray-600 bg-gray-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <Header 
+        title="Activity Log" 
+        description="Track all system activities, user actions, and administrative changes"
+        actions={
+          <div className="flex items-center space-x-3">
+            <Select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              options={[
+                { value: "all", label: "All Activities" },
+                { value: "user", label: "User Actions" },
+                { value: "driver", label: "Driver Activities" },
+                { value: "request", label: "Request Changes" },
+                { value: "message", label: "Message Events" },
+                { value: "document", label: "Document Updates" },
+                { value: "system", label: "System Events" }
+              ]}
+            />
+            <Select
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              options={[
+                { value: "all", label: "All Time" },
+                { value: "today", label: "Today" },
+                { value: "week", label: "Last Week" },
+                { value: "month", label: "Last Month" }
+              ]}
+            />
+          </div>
+        }
+      />
+
+      <Section 
+        title="System Activities" 
+        description="Complete audit trail of all actions and events across the platform"
+      >
+        {filteredActivities.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            <History className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <p className="font-medium text-lg mb-2">No activities found</p>
+            <p className="text-gray-600">
+              {searchQuery ? "Try adjusting your search criteria" : "Activities will appear here as they occur"}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredActivities.map((activity, index) => (
+              <div key={activity.id} className="flex items-start space-x-4 p-4 rounded-xl border border-gray-200 hover:bg-gray-50 transition-all duration-200">
+                <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getActivityColor(activity.type)}`}>
+                  {getActivityIcon(activity.type)}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-gray-900">{activity.action}</p>
+                    <span className="text-xs text-gray-500">
+                      {new Date(activity.timestamp).toLocaleDateString()} at{' '}
+                      {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  
+                  <p className="text-sm text-gray-600 mt-1">{activity.details}</p>
+                  
+                  <div className="flex items-center space-x-4 mt-2">
+                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                      <User className="w-3 h-3" />
+                      <span>{activity.user}</span>
+                    </div>
+                    
+                    <div className="flex items-center space-x-1 text-xs text-gray-500">
+                      <MapPin className="w-3 h-3" />
+                      <span>{activity.module}</span>
+                    </div>
+                    
+                    {activity.ip && (
+                      <div className="flex items-center space-x-1 text-xs text-gray-500">
+                        <span>IP: {activity.ip}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <Badge variant={
+                  activity.severity === 'high' ? 'error' :
+                  activity.severity === 'medium' ? 'warning' : 'default'
+                } className="text-xs">
+                  {activity.severity}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Statistics */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card className="text-center">
+            <div className="bg-blue-50 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <Activity className="w-6 h-6 text-blue-600" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">{filteredActivities.length}</p>
+            <p className="text-sm text-gray-600">Filtered Activities</p>
+          </Card>
+          
+          <Card className="text-center">
+            <div className="bg-green-50 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <User className="w-6 h-6 text-green-600" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">
+              {[...new Set(filteredActivities.map(a => a.user))].length}
+            </p>
+            <p className="text-sm text-gray-600">Active Users</p>
+          </Card>
+          
+          <Card className="text-center">
+            <div className="bg-purple-50 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <FileText className="w-6 h-6 text-purple-600" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">
+              {filteredActivities.filter(a => a.type === 'request').length}
+            </p>
+            <p className="text-sm text-gray-600">Request Events</p>
+          </Card>
+          
+          <Card className="text-center">
+            <div className="bg-yellow-50 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <MessageCircle className="w-6 h-6 text-yellow-600" />
+            </div>
+            <p className="text-2xl font-bold text-gray-900">
+              {filteredActivities.filter(a => a.type === 'message').length}
+            </p>
+            <p className="text-sm text-gray-600">Message Events</p>
+          </Card>
+        </div>
+      </Section>
+    </div>
+  );
+};
 
 // --- DASHBOARD COMPONENT ---
 const Dashboard = ({ stats, drivers }) => {
@@ -1799,6 +2030,98 @@ const seedMessages = [
   },
 ];
 
+// --- SAMPLE ACTIVITIES ---
+const seedActivities = [
+  {
+    id: 'act1',
+    timestamp: new Date(Date.now() - 3600000).toISOString(),
+    user: 'System Admin',
+    action: 'User Login',
+    type: 'system',
+    module: 'Authentication',
+    details: 'Admin user logged in successfully from IP 192.168.1.100',
+    severity: 'low',
+    ip: '192.168.1.100'
+  },
+  {
+    id: 'act2',
+    timestamp: new Date(Date.now() - 7200000).toISOString(),
+    user: 'Ahmed Ali',
+    action: 'Driver Status Updated',
+    type: 'driver',
+    module: 'Driver Management',
+    details: 'Driver status changed from "idle" to "pending_request" for shipment REQ-001',
+    severity: 'medium',
+    ip: '192.168.1.101'
+  },
+  {
+    id: 'act3',
+    timestamp: new Date(Date.now() - 10800000).toISOString(),
+    user: 'Abdi Buyer Co.',
+    action: 'New Request Created',
+    type: 'request',
+    module: 'Request Management',
+    details: 'Created new shipment request for Machinery Import to Hargeisa',
+    severity: 'medium',
+    ip: '192.168.1.102'
+  },
+  {
+    id: 'act4',
+    timestamp: new Date(Date.now() - 14400000).toISOString(),
+    user: 'System Admin',
+    action: 'User Account Created',
+    type: 'user',
+    module: 'User Management',
+    details: 'Created new driver account for Hodan Warsame',
+    severity: 'medium',
+    ip: '192.168.1.100'
+  },
+  {
+    id: 'act5',
+    timestamp: new Date(Date.now() - 18000000).toISOString(),
+    user: 'Ahmed Ali',
+    action: 'Waybill Uploaded',
+    type: 'document',
+    module: 'Documents',
+    details: 'Uploaded driver waybill for shipment REQ-001',
+    severity: 'high',
+    ip: '192.168.1.101'
+  },
+  {
+    id: 'act6',
+    timestamp: new Date(Date.now() - 21600000).toISOString(),
+    user: 'System Admin',
+    action: 'Message Sent',
+    type: 'message',
+    module: 'Messages',
+    details: 'Admin sent coordination message to driver-client thread',
+    severity: 'low',
+    ip: '192.168.1.100'
+  },
+  {
+    id: 'act7',
+    timestamp: new Date(Date.now() - 25200000).toISOString(),
+    user: 'Abdi Buyer Co.',
+    action: 'Client Waybill Uploaded',
+    type: 'document',
+    module: 'Documents',
+    details: 'Uploaded client waybill for completed shipment',
+    severity: 'high',
+    ip: '192.168.1.102'
+  },
+  {
+    id: 'act8',
+    timestamp: new Date(Date.now() - 28800000).toISOString(),
+    user: 'System Admin',
+    action: 'System Configuration Updated',
+    type: 'system',
+    module: 'Settings',
+    details: 'Updated system preferences and notification settings',
+    severity: 'medium',
+    ip: '192.168.1.100'
+  }
+];
+
 // --- UTILITY FUNCTIONS ---
 const getStatusColor = (status) => {
   const statusMap = {
@@ -1934,7 +2257,7 @@ const TrackingStatus = ({ drivers, className = "" }) => {
 };
 
 // --- SIDEBAR COMPONENT ---
-const Sidebar = ({ currentTab, setTab }) => {
+const Sidebar = ({ currentTab, setTab, searchQuery, setSearchQuery }) => {
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
     { id: "requests", label: "Requests & Orders", icon: FileText }, 
@@ -1943,6 +2266,7 @@ const Sidebar = ({ currentTab, setTab }) => {
     { id: "fleet", label: "Fleet Tracking", icon: Car },
     { id: "messages", label: "Messages", icon: MessageCircle },
     { id: "documents", label: "Documents", icon: FileText },
+    { id: "activity-log", label: "Activity Log", icon: History },
     { id: "user-management", label: "User Management", icon: Shield },
     { id: "settings", label: "Settings", icon: SettingsIcon },
   ];
@@ -1959,6 +2283,23 @@ const Sidebar = ({ currentTab, setTab }) => {
           </div>
         </div>
       </div>
+
+      {/* Search Bar */}
+      <div className="p-4 border-b border-blue-700">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-blue-300" />
+          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="block w-full pl-10 pr-3 py-2 border border-blue-600 rounded-xl bg-blue-800 placeholder-blue-300 text-white text-sm focus:border-blue-400 focus:ring-blue-400 transition-colors duration-200"
+            placeholder="Search across modules..."
+          />
+        </div>
+      </div>
+
       <nav className="flex-1 p-4 space-y-2">
         {menuItems.map(item => {
           const Icon = item.icon;
@@ -2604,6 +2945,8 @@ const App = () => {
   const [users, setUsers] = useState(seedUsers);
   const [messages, setMessages] = useState(seedMessages);
   const [requests, setRequests] = useState(seedRequests);
+  const [activities, setActivities] = useState(seedActivities);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const currentUser = users[0];
 
@@ -2653,6 +2996,15 @@ const App = () => {
 
   const stats = useMemo(() => calculateStats(drivers, tracks, requests, owners), [drivers, tracks, requests, owners]);
 
+  const logActivity = (activity) => {
+    const newActivity = {
+      id: generateId(),
+      timestamp: new Date().toISOString(),
+      ...activity
+    };
+    setActivities(prev => [newActivity, ...prev]);
+  };
+
   const handleSendRequest = (clientId, driverId, cargo, origin, destination) => {
       const client = owners.find(o => o.id === clientId);
       const driver = drivers.find(d => d.id === driverId);
@@ -2680,6 +3032,16 @@ const App = () => {
           d.id === driverId ? { ...d, status: 'pending_request' } : d
       ));
 
+      logActivity({
+        user: client.name,
+        action: 'New Request Created',
+        type: 'request',
+        module: 'Request Management',
+        details: `Created new shipment request for ${cargo} from ${origin} to ${destination}`,
+        severity: 'medium',
+        ip: '192.168.1.105'
+      });
+
       return true;
   };
 
@@ -2689,9 +3051,21 @@ const App = () => {
               let newStatus = req.status;
               const driverId = req.driverId;
               const clientId = req.clientId;
+              const driver = drivers.find(d => d.id === driverId);
+              const client = owners.find(o => o.id === clientId);
 
               if (action === 'approve') {
                   newStatus = REQUEST_STATUSES.APPROVED_BY_DRIVER;
+                  
+                  logActivity({
+                    user: driver?.name || 'Unknown Driver',
+                    action: 'Request Approved',
+                    type: 'request',
+                    module: 'Request Management',
+                    details: `Approved shipment request ${requestId.slice(0, 8)} for ${req.cargo}`,
+                    severity: 'medium',
+                    ip: '192.168.1.106'
+                  });
               } else if (action === 'accept') {
                   newStatus = REQUEST_STATUSES.ACCEPTED;
                   
@@ -2702,6 +3076,16 @@ const App = () => {
                   setOwners(prevOwners => prevOwners.map(o =>
                       o.id === clientId ? { ...o, assignedDrivers: [...new Set([...o.assignedDrivers, driverId])] } : o
                   ));
+
+                  logActivity({
+                    user: driver?.name || 'Unknown Driver',
+                    action: 'Request Accepted',
+                    type: 'request',
+                    module: 'Request Management',
+                    details: `Accepted and assigned to shipment ${requestId.slice(0, 8)}`,
+                    severity: 'high',
+                    ip: '192.168.1.106'
+                  });
               } else if (action === 'reject' || action === 'completed') {
                   newStatus = action === 'reject' ? REQUEST_STATUSES.REJECTED : REQUEST_STATUSES.COMPLETED;
 
@@ -2712,6 +3096,16 @@ const App = () => {
                   setOwners(prevOwners => prevOwners.map(o =>
                       o.id === clientId ? { ...o, assignedDrivers: o.assignedDrivers.filter(id => id !== driverId) } : o
                   ));
+
+                  logActivity({
+                    user: action === 'reject' ? (driver?.name || 'Unknown Driver') : 'System',
+                    action: action === 'reject' ? 'Request Rejected' : 'Request Completed',
+                    type: 'request',
+                    module: 'Request Management',
+                    details: `${action === 'reject' ? 'Rejected' : 'Completed'} shipment request ${requestId.slice(0, 8)}`,
+                    severity: action === 'reject' ? 'medium' : 'high',
+                    ip: '192.168.1.106'
+                  });
               }
 
               return { ...req, status: newStatus };
@@ -2721,6 +3115,8 @@ const App = () => {
   };
 
   const handleDriverStatusUpdate = (driverId, newStatus, waybillFile) => {
+      const driver = drivers.find(d => d.id === driverId);
+      
       setDrivers(prevDrivers => {
           const updatedDrivers = prevDrivers.map(d => 
               d.id === driverId ? { ...d, status: newStatus } : d
@@ -2750,13 +3146,35 @@ const App = () => {
               { ...req, currentDriverStatus: newStatus } : req
           );
       });
+
+      logActivity({
+        user: driver?.name || 'Unknown Driver',
+        action: 'Driver Status Updated',
+        type: 'driver',
+        module: 'Driver Management',
+        details: `Driver status changed to "${newStatus}"${waybillFile ? ' with waybill upload' : ''}`,
+        severity: 'medium',
+        ip: '192.168.1.107'
+      });
   };
 
   const handleClientWaybillUpload = (requestId, waybillFile) => {
       const waybillUrl = `/client/${requestId}/${waybillFile.name}`;
+      const request = requests.find(r => r.id === requestId);
+      
       setRequests(prevRequests => prevRequests.map(req => 
           req.id === requestId ? { ...req, clientWaybillUrl: waybillUrl } : req
       ));
+
+      logActivity({
+        user: request?.clientName || 'Unknown Client',
+        action: 'Client Waybill Uploaded',
+        type: 'document',
+        module: 'Documents',
+        details: `Uploaded client waybill for shipment ${requestId.slice(0, 8)}`,
+        severity: 'high',
+        ip: '192.168.1.108'
+      });
   };
 
   const handleSendMessage = (messageData) => {
@@ -2766,6 +3184,16 @@ const App = () => {
       timestamp: new Date().toISOString(),
     };
     setMessages(prev => [...prev, newMessage]);
+
+    logActivity({
+      user: 'System Admin',
+      action: 'Admin Message Sent',
+      type: 'message',
+      module: 'Messages',
+      details: `Sent coordination message to thread ${messageData.threadId}`,
+      severity: 'low',
+      ip: '192.168.1.100'
+    });
   };
 
   const handleSaveUser = (userData) => {
@@ -2775,6 +3203,16 @@ const App = () => {
       if (userData.role === 'driver') {
         setDrivers(prev => prev.map(d => d.id === userData.id ? { ...d, ...userData } : d));
       }
+
+      logActivity({
+        user: 'System Admin',
+        action: 'User Account Updated',
+        type: 'user',
+        module: 'User Management',
+        details: `Updated user account for ${userData.name}`,
+        severity: 'medium',
+        ip: '192.168.1.100'
+      });
     } else {
       const newUser = {
         ...userData,
@@ -2800,17 +3238,48 @@ const App = () => {
         };
         setDrivers(prev => [...prev, newDriver]);
       }
+
+      logActivity({
+        user: 'System Admin',
+        action: 'New User Created',
+        type: 'user',
+        module: 'User Management',
+        details: `Created new ${userData.role} account for ${userData.name}`,
+        severity: 'medium',
+        ip: '192.168.1.100'
+      });
     }
   };
 
   const handleDeleteUser = (userId) => {
+    const user = users.find(u => u.id === userId);
     setUsers(prev => prev.filter(u => u.id !== userId));
     setDrivers(prev => prev.filter(d => d.id !== userId));
+
+    logActivity({
+      user: 'System Admin',
+      action: 'User Account Deleted',
+      type: 'user',
+      module: 'User Management',
+      details: `Deleted user account for ${user?.name || 'Unknown User'}`,
+      severity: 'high',
+      ip: '192.168.1.100'
+    });
   };
 
   const handleSaveDriver = (driverData) => {
     if (driverData.id) {
       setDrivers(prev => prev.map(d => d.id === driverData.id ? { ...d, ...driverData } : d));
+
+      logActivity({
+        user: 'System Admin',
+        action: 'Driver Details Updated',
+        type: 'driver',
+        module: 'Driver Management',
+        details: `Updated driver details for ${driverData.name || 'Unknown Driver'}`,
+        severity: 'medium',
+        ip: '192.168.1.100'
+      });
     }
   };
 
@@ -2829,74 +3298,89 @@ const App = () => {
         return <Dashboard stats={stats} drivers={drivers} />;
       
       case "requests":
-        return <RequestManagement 
+        return (
+          <RequestManagement 
             requests={requests}
             drivers={drivers}
-            owners={owners}
             onDriverResponse={handleDriverResponse}
-        />;
-        
+          />
+        );
+      
       case "drivers":
-        return <DriverManagement
-          drivers={drivers}
-          requests={requests}
-          onSaveDriver={handleSaveDriver}
-          onDeleteDriver={handleDeleteUser}
-          onDriverStatusUpdate={handleDriverStatusUpdate} 
-          onDriverResponse={handleDriverResponse} 
-        />;
+        return (
+          <DriverManagement 
+            drivers={drivers}
+            requests={requests}
+            onDriverStatusUpdate={handleDriverStatusUpdate}
+            onDriverResponse={handleDriverResponse}
+            onSaveDriver={handleSaveDriver}
+            onDeleteDriver={handleDeleteUser}
+          />
+        );
       
       case "owners":
-        return <ClientManagement
-          drivers={drivers}
-          owners={owners}
-          requests={requests}
-          onSendRequest={handleSendRequest} 
-          onClientWaybillUpload={handleClientWaybillUpload} 
-          onSaveOwner={handleSaveOwner}
-          onDeleteOwner={handleDeleteOwner}
-        />;
+        return (
+          <ClientManagement 
+            drivers={drivers}
+            owners={owners}
+            requests={requests}
+            onSendRequest={handleSendRequest}
+            onClientWaybillUpload={handleClientWaybillUpload}
+            onSaveOwner={handleSaveOwner}
+            onDeleteOwner={handleDeleteOwner}
+          />
+        );
       
       case "fleet":
-        return <FleetTracking 
-            tracks={tracks} 
-            drivers={drivers} 
-            onUpdateAvailability={handleUpdateAvailability} 
-            onAssignDriver={handleAssignDriverToTrack} 
-        />;
+        return <FleetTracking tracks={tracks} drivers={drivers} />;
+      
       case "messages":
-        return <Messages 
-          messages={messages} 
-          onSendMessage={handleSendMessage} 
-          drivers={drivers} 
-          owners={owners} 
-        />;
+        return (
+          <Messages 
+            messages={messages}
+            drivers={drivers}
+            owners={owners}
+            onSendMessage={handleSendMessage}
+          />
+        );
+      
       case "documents":
         return <Documents requests={requests} />;
+      
+      case "activity-log":
+        return <ActivityLog activities={activities} searchQuery={searchQuery} />;
+      
       case "user-management":
-        return <UserManagement 
-          users={users} 
-          drivers={drivers}
-          onSaveUser={handleSaveUser} 
-          onDeleteUser={handleDeleteUser}
-          onSaveDriver={handleSaveDriver}
-        />;
+        return (
+          <UserManagement 
+            users={users}
+            drivers={drivers}
+            onSaveUser={handleSaveUser}
+            onDeleteUser={handleDeleteUser}
+            onSaveDriver={handleSaveDriver}
+          />
+        );
+      
       case "settings":
         return <Settings currentUser={currentUser} onSaveUser={handleSaveUser} />;
+      
       default:
         return <Dashboard stats={stats} drivers={drivers} />;
     }
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Sidebar currentTab={currentTab} setTab={setCurrentTab} />
-      
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden ml-64">
-        <main className="flex-1 overflow-y-auto p-8">
+    <div className="min-h-screen bg-gray-50 flex">
+      <Sidebar 
+        currentTab={currentTab} 
+        setTab={setCurrentTab}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+      />
+      <div className="flex-1 ml-64">
+        <div className="p-8">
           {renderContent()}
-        </main>
+        </div>
       </div>
     </div>
   );
